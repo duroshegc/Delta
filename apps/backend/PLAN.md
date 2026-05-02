@@ -247,58 +247,58 @@ The backend is the core API service built with Bun runtime and ElysiaJS framewor
 ## Phase 8: Safety & Moderation
 
 ### 8.1 Moderation Module (`/moderation`)
-- [ ] `POST /reports` - Submit report
-- [ ] `POST /blocks` - Block user
-- [ ] Report categorization
-- [ ] Trust score calculation
-- [ ] Moderation case creation
-- [ ] User restrictions (ban, suspend, restrict features)
+- [x] `POST /reports` - Submit report
+- [x] `POST /blocks` - Block user
+- [x] Report categorization
+- [x] Trust score calculation
+- [x] Moderation case creation
+- [x] User restrictions (ban, suspend, restrict features)
 
 ### 8.2 Trust & Safety
-- [ ] Trust score system
-- [ ] Block/report checks in matching
-- [ ] Verification status management
-- [ ] Safety filters for live matching
-- [ ] Abuse pattern detection
+- [x] Trust score system
+- [x] Block/report checks in matching
+- [x] Verification status management
+- [x] Safety filters for live matching
+- [x] Abuse pattern detection
 
 ---
 
 ## Phase 9: Admin & Dashboard API
 
 ### 9.1 Admin Module (`/admin`)
-- [ ] `GET /admin/users` - User search and listing
-- [ ] `GET /admin/reports` - Report queue
-- [ ] `GET /admin/sessions` - Live session review
-- [ ] `PATCH /admin/users/:id` - User actions
-- [ ] `GET /admin/analytics` - Dashboard metrics
-- [ ] RBAC middleware (roles: super_admin, moderator, support, etc.)
-- [ ] Audit log creation for all actions
+- [x] `GET /admin/users` - User search and listing
+- [x] `GET /admin/reports` - Report queue
+- [x] `GET /admin/sessions` - Live session review
+- [x] `PATCH /admin/users/:id` - User actions
+- [x] `GET /admin/analytics` - Dashboard metrics
+- [x] RBAC middleware (roles: super_admin, moderator, support, etc.)
+- [x] Audit log creation for all actions
 
 ### 9.2 Analytics Endpoints
-- [ ] Growth metrics (DAU, MAU, signups)
-- [ ] Dating funnel metrics
-- [ ] Live match funnel metrics
-- [ ] Revenue/wallet metrics
-- [ ] Safety metrics
+- [x] Growth metrics (users, profiles)
+- [x] Dating funnel metrics
+- [x] Live match funnel metrics
+- [x] Revenue/wallet metrics
+- [x] Safety metrics
 
 ---
 
 ## Phase 10: Testing & Documentation
 
 ### 10.1 Testing
-- [ ] Unit tests for core business logic
+- [x] Unit tests for core business logic
 - [ ] API integration tests
-- [ ] Wallet transaction tests (idempotency)
-- [ ] Matching logic tests
-- [ ] Safety filter tests
-- [ ] Load testing setup
+- [x] Wallet transaction tests (idempotency)
+- [x] Matching logic tests
+- [x] Safety filter tests
+- [x] Load testing setup
 
 ### 10.2 Documentation
-- [ ] OpenAPI/Swagger documentation
-- [ ] API endpoint documentation
-- [ ] Environment setup guide
-- [ ] Deployment guide
-- [ ] Troubleshooting guide
+- [x] OpenAPI/Swagger documentation
+- [x] API endpoint documentation
+- [x] Environment setup guide
+- [x] Deployment guide
+- [x] Troubleshooting guide
 
 ---
 
