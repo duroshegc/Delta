@@ -142,6 +142,10 @@ class InMemoryCursor<T extends Document> {
 
 function matches(doc: Document, query: Document): boolean {
   return Object.entries(query).every(([key, expected]) => {
+    if (key === "$or") {
+      return Array.isArray(expected) && expected.some((branch) => matches(doc, branch));
+    }
+
     const actual = getPath(doc, key);
 
     if (isOperatorObject(expected)) {
@@ -161,6 +165,8 @@ function matches(doc: Document, query: Document): boolean {
             return compareValues(actual, value) < 0;
           case "$near":
             return isNear(actual, value);
+          case "$regex":
+            return new RegExp(String(value), expected.$options || "").test(String(actual || ""));
           default:
             return false;
         }

@@ -169,7 +169,7 @@ export class SafetyService {
       ["high", "critical"].includes(report.severity),
     ).length;
     const verificationPoints = profile?.verificationStatus === "verified" ? 20 : 0;
-    const reportPenalty = Math.min(45, reports.length * 8 + highSeverityReports * 12);
+    const reportPenalty = Math.min(75, reports.length * 8 + highSeverityReports * 52);
     const blockPenalty = Math.min(20, blocks.length * 5);
     const score = Math.max(0, Math.min(100, 80 + verificationPoints - reportPenalty - blockPenalty));
     const riskLevel =
