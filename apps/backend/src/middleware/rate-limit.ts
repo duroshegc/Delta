@@ -101,7 +101,7 @@ export function userRateLimit(config: RateLimitConfig) {
     config,
     keyGenerator: (context) => {
       // Assumes auth middleware has set context.user
-      const userId = context.user?.id || context.userId;
+      const userId = context.user?.userId || context.user?.id || context.userId;
       if (!userId) {
         // Fallback to IP if no user
         const ip = getClientIp(context.request);
@@ -119,7 +119,7 @@ export function endpointRateLimit(endpoint: string, config: RateLimitConfig) {
   return rateLimit({
     config,
     keyGenerator: (context) => {
-      const userId = context.user?.id || context.userId;
+      const userId = context.user?.userId || context.user?.id || context.userId;
       if (userId) {
         return `endpoint:${endpoint}:user:${userId}`;
       }

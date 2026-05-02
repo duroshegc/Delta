@@ -9,6 +9,7 @@ import { getDatabase } from "../../config/database";
 import { COLLECTIONS } from "../../types/database";
 import type { Profile } from "../../types/profile";
 import type { Media } from "../../types/media";
+import type { Like, Match } from "../../types/matching";
 import { requireAuth } from "../../middleware/auth";
 import { DiscoveryService } from "../../lib/discovery-service";
 import { discoveryFeedQuerySchema } from "./schemas";
@@ -16,6 +17,7 @@ import { ValidationError } from "../../utils/errors";
 import { logger } from "../../config/logger";
 import { userRateLimit } from "../../middleware/rate-limit";
 import { RATE_LIMITS } from "../../config/rate-limits";
+import { SafetyService } from "../../lib/safety-service";
 
 export const discoveryRoutes = new Elysia({ prefix: "/discovery" })
   .use(requireAuth)
@@ -51,7 +53,7 @@ export const discoveryRoutes = new Elysia({ prefix: "/discovery" })
         const mediaCollection = db.collection<Media>(COLLECTIONS.MEDIA);
 
         const userProfile = await profilesCollection.findOne({
-          userId: new ObjectId(user.id),
+          userId: new ObjectId(user.userId),
         });
 
         if (!userProfile) {
@@ -64,11 +66,18 @@ export const discoveryRoutes = new Elysia({ prefix: "/discovery" })
         const filters: any = {};
 
         // Location filter
-        if (validatedQuery.latitude && validatedQuery.longitude) {
+        if (
+          validatedQuery.latitude !== undefined &&
+          validatedQuery.longitude !== undefined
+        ) {
           filters.location = {
             type: "Point" as const,
             coordinates: [validatedQuery.longitude, validatedQuery.latitude],
           };
+          filters.maxDistance =
+            validatedQuery.maxDistance || userProfile.maxDistance;
+        } else if (userProfile.location) {
+          filters.location = userProfile.location;
           filters.maxDistance =
             validatedQuery.maxDistance || userProfile.maxDistance;
         }
@@ -111,10 +120,13 @@ export const discoveryRoutes = new Elysia({ prefix: "/discovery" })
         const discoveryService = new DiscoveryService(
           profilesCollection,
           mediaCollection,
+          db.collection<Like>(COLLECTIONS.LIKES),
+          db.collection<Match>(COLLECTIONS.MATCHES),
+          new SafetyService(db),
         );
 
         const feed = await discoveryService.getDiscoveryFeed(
-          new ObjectId(user.id),
+          new ObjectId(user.userId),
           filters,
           validatedQuery.limit,
           validatedQuery.cursor,
@@ -122,7 +134,7 @@ export const discoveryRoutes = new Elysia({ prefix: "/discovery" })
 
         logger.info(
           {
-            userId: user.id,
+            userId: user.userId,
             filters,
             candidatesCount: feed.candidates.length,
           },
@@ -135,13 +147,14 @@ export const discoveryRoutes = new Elysia({ prefix: "/discovery" })
         };
       } catch (error) {
         logger.error(
-          { error, userId: user.id },
+          { error, userId: user.userId },
           "Failed to get discovery feed",
         );
         throw error;
       }
     },
     {
+      beforeHandle: userRateLimit(RATE_LIMITS.DISCOVERY),
       detail: {
         tags: ["Discovery"],
         summary: "Get discovery feed",

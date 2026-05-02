@@ -63,6 +63,7 @@ export async function initializeDatabase(db: Db): Promise<void> {
     await createIndexes(db, COLLECTIONS.LIKES, [
       { key: { fromUserId: 1, toUserId: 1 }, unique: true },
       { key: { toUserId: 1 } },
+      { key: { fromUserId: 1, status: 1 } },
       { key: { createdAt: 1 } },
     ]);
 
@@ -70,7 +71,9 @@ export async function initializeDatabase(db: Db): Promise<void> {
     await ensureCollection(db, COLLECTIONS.MATCHES);
     await createIndexes(db, COLLECTIONS.MATCHES, [
       { key: { participants: 1 } },
+      { key: { participantKey: 1 }, unique: true, sparse: true },
       { key: { status: 1 } },
+      { key: { participants: 1, status: 1, matchedAt: -1 } },
       { key: { lastMessageAt: 1 } },
       { key: { matchedAt: 1 } },
     ]);
@@ -80,6 +83,7 @@ export async function initializeDatabase(db: Db): Promise<void> {
     await createIndexes(db, COLLECTIONS.CONVERSATIONS, [
       { key: { matchId: 1 }, unique: true },
       { key: { participants: 1 } },
+      { key: { participants: 1, status: 1, lastMessageAt: -1 } },
       { key: { updatedAt: 1 } },
     ]);
 
@@ -87,7 +91,9 @@ export async function initializeDatabase(db: Db): Promise<void> {
     await ensureCollection(db, COLLECTIONS.MESSAGES);
     await createIndexes(db, COLLECTIONS.MESSAGES, [
       { key: { conversationId: 1, createdAt: 1 } },
+      { key: { conversationId: 1, _id: -1 } },
       { key: { senderId: 1 } },
+      { key: { recipientIds: 1, readBy: 1 } },
       { key: { moderationStatus: 1 } },
     ]);
 
@@ -102,6 +108,7 @@ export async function initializeDatabase(db: Db): Promise<void> {
     await createIndexes(db, COLLECTIONS.WALLET_TRANSACTIONS, [
       { key: { userId: 1, createdAt: 1 } },
       { key: { idempotencyKey: 1 }, unique: true },
+      { key: { referenceId: 1 } },
       { key: { type: 1 } },
       { key: { status: 1 } },
       { key: { userId: 1, status: 1 } },
@@ -111,8 +118,10 @@ export async function initializeDatabase(db: Db): Promise<void> {
     await ensureCollection(db, COLLECTIONS.TOKEN_RESERVATIONS);
     await createIndexes(db, COLLECTIONS.TOKEN_RESERVATIONS, [
       { key: { userId: 1 } },
+      { key: { idempotencyKey: 1 }, unique: true },
       { key: { sessionId: 1 } },
       { key: { status: 1 } },
+      { key: { userId: 1, status: 1 } },
       { key: { expiresAt: 1 }, expireAfterSeconds: 0 }, // TTL index
     ]);
 
@@ -120,8 +129,11 @@ export async function initializeDatabase(db: Db): Promise<void> {
     await ensureCollection(db, COLLECTIONS.LIVE_MATCH_TICKETS);
     await createIndexes(db, COLLECTIONS.LIVE_MATCH_TICKETS, [
       { key: { userId: 1 } },
+      { key: { userId: 1, status: 1 } },
       { key: { status: 1 } },
+      { key: { region: 1, intent: 1, status: 1, createdAt: 1 } },
       { key: { poolKeys: 1 } },
+      { key: { sessionId: 1 } },
       { key: { createdAt: 1 } },
       { key: { expiresAt: 1 }, expireAfterSeconds: 0 }, // TTL index
     ]);
@@ -131,6 +143,7 @@ export async function initializeDatabase(db: Db): Promise<void> {
     await createIndexes(db, COLLECTIONS.LIVE_SESSIONS, [
       { key: { participants: 1 } },
       { key: { status: 1 } },
+      { key: { billingStatus: 1 } },
       { key: { region: 1 } },
       { key: { interest: 1 } },
       { key: { startedAt: 1 } },
@@ -153,6 +166,15 @@ export async function initializeDatabase(db: Db): Promise<void> {
       { key: { status: 1 } },
       { key: { createdAt: 1 } },
       { key: { status: 1, severity: 1 } },
+    ]);
+
+    // Blocks Collection
+    await ensureCollection(db, COLLECTIONS.BLOCKS);
+    await createIndexes(db, COLLECTIONS.BLOCKS, [
+      { key: { blockerUserId: 1, blockedUserId: 1 }, unique: true },
+      { key: { blockerUserId: 1 } },
+      { key: { blockedUserId: 1 } },
+      { key: { createdAt: 1 } },
     ]);
 
     // Moderation Cases Collection

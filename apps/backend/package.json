@@ -9,6 +9,7 @@
     "start": "bun src/index.ts",
     "build": "bun build src/index.ts --outdir ./dist --target bun",
     "typecheck": "tsc --noEmit",
+    "test": "node --loader ./tests/ts-loader.mjs --experimental-strip-types --experimental-transform-types --test \"tests/**/*.test.ts\"",
     "db:init": "bun src/scripts/init-db.ts",
     "db:seed": "bun src/scripts/seed-db.ts"
   },

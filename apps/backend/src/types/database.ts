@@ -21,6 +21,7 @@ export const COLLECTIONS = {
   LIVE_SESSIONS: "live_sessions",
   LIVE_SESSION_EVENTS: "live_session_events",
   REPORTS: "reports",
+  BLOCKS: "blocks",
   MODERATION_CASES: "moderation_cases",
   TRUST_SCORES: "trust_scores",
   AUDIT_LOGS: "audit_logs",

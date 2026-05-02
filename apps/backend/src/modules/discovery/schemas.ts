@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { ObjectId } from "mongodb";
 
 /**
  * Discovery feed query parameters schema
@@ -15,7 +16,12 @@ export const discoveryFeedQuerySchema = z.object({
     .optional()
     .transform((val) => (val ? parseInt(val, 10) : 20))
     .pipe(z.number().min(1).max(50)),
-  cursor: z.string().optional(),
+  cursor: z
+    .string()
+    .optional()
+    .refine((val) => !val || ObjectId.isValid(val), {
+      message: "Invalid cursor",
+    }),
 
   // Location filters
   latitude: z

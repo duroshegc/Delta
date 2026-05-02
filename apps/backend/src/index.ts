@@ -9,6 +9,16 @@ import { userRoutes } from "./modules/users/routes";
 import { profileRoutes } from "./modules/profiles/routes";
 import { mediaRoutes } from "./modules/media/routes";
 import { discoveryRoutes } from "./modules/discovery/routes";
+import { likeRoutes, matchRoutes } from "./modules/matches/routes";
+import { chatRoutes } from "./modules/chat/routes";
+import { walletRoutes } from "./modules/wallet/routes";
+import {
+  liveKitRoutes,
+  liveMatchRoutes,
+  liveMatchWebSocketRoutes,
+} from "./modules/live-match/routes";
+import { moderationRoutes } from "./modules/moderation/routes";
+import { adminRoutes } from "./modules/admin/routes";
 
 const app = new Elysia()
   .use(
@@ -126,7 +136,21 @@ const app = new Elysia()
   // Mount media management routes
   .use(mediaRoutes)
   // Mount discovery routes
-  .use(discoveryRoutes);
+  .use(discoveryRoutes)
+  // Mount likes and matches routes
+  .use(likeRoutes)
+  .use(matchRoutes)
+  // Mount chat routes
+  .use(chatRoutes)
+  // Mount wallet routes
+  .use(walletRoutes)
+  // Mount live match and LiveKit routes
+  .use(liveMatchRoutes)
+  .use(liveKitRoutes)
+  .use(liveMatchWebSocketRoutes)
+  // Mount safety and admin routes
+  .use(moderationRoutes)
+  .use(adminRoutes);
 
 // Initialize database connection before starting server
 async function startServer() {

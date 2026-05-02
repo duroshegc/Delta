@@ -1,6 +1,6 @@
 # Backend Development Plan
 
-**Status**: 🟢 Phase 1 Complete - Ready for Phase 2
+**Status**: 🟢 Phase 4 Core Complete - Ready for Phase 5
 **Priority**: 1 (Build First)
 **Dependencies**: None - Foundation layer
 **Last Updated**: 2026-05-02
@@ -167,17 +167,18 @@ The backend is the core API service built with Bun runtime and ElysiaJS framewor
 ## Phase 4: Discovery & Matching
 
 ### 4.1 Discovery Module (`/discovery`)
-- [ ] `GET /discovery/feed` - Profile candidates
-- [ ] Geospatial queries (MongoDB 2dsphere)
-- [ ] Filter by preferences, intent, age range
-- [ ] Ranking algorithm implementation
-- [ ] Pagination and cursor-based loading
+- [x] `GET /discovery/feed` - Profile candidates
+- [x] Geospatial queries (MongoDB 2dsphere)
+- [x] Filter by preferences, intent, age range
+- [x] Ranking algorithm implementation
+- [x] Pagination and cursor-based loading
+- [x] Exclude already liked and actively matched profiles
 
 ### 4.2 Likes & Matches Module (`/likes`, `/matches`)
-- [ ] `POST /likes` - Send like/super like
-- [ ] `GET /matches` - List matches
-- [ ] `DELETE /matches/:matchId` - Unmatch
-- [ ] Match creation on mutual like
+- [x] `POST /likes` - Send like/super like
+- [x] `GET /matches` - List matches
+- [x] `DELETE /matches/:matchId` - Unmatch
+- [x] Match creation on mutual like
 - [ ] Match notifications
 
 ---
@@ -185,59 +186,61 @@ The backend is the core API service built with Bun runtime and ElysiaJS framewor
 ## Phase 5: Chat System
 
 ### 5.1 Chat Module (`/chat`)
-- [ ] `GET /conversations` - List conversations
-- [ ] `GET /conversations/:id/messages` - Get messages
-- [ ] `POST /conversations/:id/messages` - Send message
-- [ ] Message metadata storage
-- [ ] Media message authorization
-- [ ] Safety filters and moderation hooks
+- [x] `GET /conversations` - List conversations
+- [x] `GET /conversations/:id/messages` - Get messages
+- [x] `POST /conversations/:id/messages` - Send message
+- [x] Message metadata storage
+- [x] Media message authorization
+- [x] Safety filters and moderation hooks
 
 ---
 
 ## Phase 6: Wallet & Token Economy
 
 ### 6.1 Wallet Module (`/wallet`)
-- [ ] `GET /wallet` - Get balance and history
-- [ ] `GET /wallet/packages` - Available token packages
-- [ ] `POST /wallet/purchase/ios/verify` - iOS IAP verification
-- [ ] `POST /wallet/purchase/android/verify` - Android IAP verification
-- [ ] Wallet ledger (immutable transactions)
-- [ ] Idempotency key handling
-- [ ] Balance calculation from ledger
+- [x] `GET /wallet` - Get balance and history
+- [x] `GET /wallet/packages` - Available token packages
+- [x] `POST /wallet/purchase/ios/verify` - iOS IAP verification endpoint
+- [x] `POST /wallet/purchase/android/verify` - Android IAP verification endpoint
+- [ ] Live Apple/Google receipt verification with provider APIs
+- [x] Wallet ledger (immutable transactions)
+- [x] Idempotency key handling
+- [x] Balance calculation from ledger
 
 ### 6.2 Token Operations
-- [ ] Reservation system (hold tokens)
-- [ ] Settlement system (charge tokens)
-- [ ] Refund logic
-- [ ] Bonus token handling
-- [ ] Admin adjustments with audit trail
+- [x] Reservation system (hold tokens)
+- [x] Settlement system (charge tokens)
+- [x] Refund logic
+- [x] Bonus token handling
+- [x] Admin adjustments with audit trail
 
 ---
 
 ## Phase 7: Live Matching System
 
 ### 7.1 Live Match Module (`/live-match`)
-- [ ] `POST /live-match/search` - Create match ticket
-- [ ] `POST /live-match/cancel` - Cancel search
-- [ ] `GET /live-match/status/:ticketId` - Polling endpoint
-- [ ] `WS /live-match/events` - WebSocket status channel
-- [ ] Ticket creation in MongoDB + Redis
-- [ ] Pool placement logic (region, intent, interest)
-- [ ] Rate limiting for search attempts
+- [x] `POST /live-match/search` - Create match ticket
+- [x] `POST /live-match/cancel` - Cancel search
+- [x] `GET /live-match/status/:ticketId` - Polling endpoint
+- [x] `WS /live-match/events` - WebSocket status channel
+- [x] Ticket creation in MongoDB
+- [ ] Redis pool mirroring
+- [x] Pool placement logic (region, intent, interest)
+- [x] Rate limiting for search attempts
 
 ### 7.2 LiveKit Integration (`/livekit`)
-- [ ] Room creation helpers
-- [ ] Participant token generation (JWT)
-- [ ] `POST /livekit/webhook` - Webhook handler
-- [ ] Session lifecycle management
-- [ ] Participant events processing
+- [x] Room creation helpers
+- [x] Participant token generation (JWT)
+- [x] `POST /livekit/webhook` - Webhook handler
+- [x] Session lifecycle management
+- [x] Participant events processing
 
 ### 7.3 Session Management
-- [ ] Session document creation
-- [ ] Status state machine
+- [x] Session document creation
+- [x] Status state machine
 - [ ] Join timeout handling
-- [ ] Duration tracking
-- [ ] Billing status updates
+- [x] Duration tracking
+- [x] Billing status updates
 
 ---
 

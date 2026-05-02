@@ -6,15 +6,16 @@
 import { ObjectId, type Collection } from "mongodb";
 import type { Profile } from "../types/profile";
 import type { Media } from "../types/media";
+import type { Like, Match } from "../types/matching";
 import type {
   DiscoveryFilters,
   DiscoveryCandidate,
   DiscoveryFeed,
-  RankingWeights,
 } from "../types/discovery";
 import { DEFAULT_DISCOVERY_CONFIG } from "../types/discovery";
 import { calculateDistance } from "./profile-service";
 import { logger } from "../config/logger";
+import { SafetyService } from "./safety-service";
 
 /**
  * Discovery Service Class
@@ -23,6 +24,9 @@ export class DiscoveryService {
   constructor(
     private profilesCollection: Collection<Profile>,
     private mediaCollection: Collection<Media>,
+    private likesCollection: Collection<Like>,
+    private matchesCollection: Collection<Match>,
+    private safetyService?: SafetyService,
   ) {}
 
   /**
@@ -35,8 +39,15 @@ export class DiscoveryService {
     cursor?: string,
   ): Promise<DiscoveryFeed> {
     try {
-      // Build MongoDB query
-      const query = this.buildDiscoveryQuery(currentUserId, filters);
+      const excludedUserIds = await this.getExcludedUserIds(currentUserId);
+      const blockedUserIds = this.safetyService
+        ? await this.safetyService.getBlockedUserIds(currentUserId)
+        : [];
+      const query = this.buildDiscoveryQuery(
+        currentUserId,
+        filters,
+        [...excludedUserIds, ...blockedUserIds],
+      );
 
       // Get profiles with geospatial query if location provided
       let profiles: Profile[];
@@ -103,12 +114,13 @@ export class DiscoveryService {
   private buildDiscoveryQuery(
     currentUserId: ObjectId,
     filters: DiscoveryFilters,
+    excludedUserIds: ObjectId[],
   ): any {
     const query: any = {
       // Exclude current user
-      userId: { $ne: currentUserId },
+      userId: { $nin: [currentUserId, ...excludedUserIds] },
       // Only visible profiles
-      visibility: "public",
+      visibility: "active",
       // Minimum completion threshold
       completionScore: {
         $gte:
@@ -145,6 +157,38 @@ export class DiscoveryService {
     }
 
     return query;
+  }
+
+  /**
+   * Exclude profiles the user has already liked or actively matched.
+   */
+  private async getExcludedUserIds(currentUserId: ObjectId): Promise<ObjectId[]> {
+    const [likes, matches] = await Promise.all([
+      this.likesCollection
+        .find({ fromUserId: currentUserId, status: "active" })
+        .project<{ toUserId: ObjectId }>({ toUserId: 1 })
+        .toArray(),
+      this.matchesCollection
+        .find({ participants: currentUserId, status: "active" })
+        .project<{ participants: ObjectId[] }>({ participants: 1 })
+        .toArray(),
+    ]);
+
+    const excluded = new Map<string, ObjectId>();
+
+    for (const like of likes) {
+      excluded.set(like.toUserId.toString(), like.toUserId);
+    }
+
+    for (const match of matches) {
+      for (const participant of match.participants) {
+        if (!participant.equals(currentUserId)) {
+          excluded.set(participant.toString(), participant);
+        }
+      }
+    }
+
+    return Array.from(excluded.values());
   }
 
   /**
