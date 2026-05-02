@@ -6,6 +6,9 @@ import { initializeDatabase } from "../lib/db-init";
 let client: MongoClient | null = null;
 let db: Db | null = null;
 
+// Export db for direct access (will be initialized on app start)
+export { db };
+
 export async function connectDatabase(skipInit = false): Promise<Db> {
   if (db) {
     return db;

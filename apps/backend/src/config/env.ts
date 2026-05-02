@@ -30,6 +30,22 @@ const envSchema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.string().url(),
 
+  // JWT
+  JWT_ACCESS_SECRET: z.string().min(32),
+  JWT_REFRESH_SECRET: z.string().min(32),
+
+  // Email (Zoho SMTP)
+  SMTP_HOST: z.string().default("smtp.zoho.com"),
+  SMTP_PORT: z.string().default("465").transform(Number),
+  SMTP_SECURE: z
+    .string()
+    .default("true")
+    .transform((val) => val === "true"),
+  SMTP_USER: z.string().email(),
+  SMTP_PASSWORD: z.string().min(1),
+  SMTP_FROM_NAME: z.string().default("Delta"),
+  SMTP_FROM_EMAIL: z.string().email(),
+
   // In-App Purchases
   APPLE_IAP_SHARED_SECRET: z.string().optional().or(z.literal("")),
   GOOGLE_PLAY_PACKAGE_NAME: z.string().optional().or(z.literal("")),

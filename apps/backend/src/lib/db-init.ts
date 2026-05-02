@@ -20,6 +20,21 @@ export async function initializeDatabase(db: Db): Promise<void> {
       { key: { createdAt: 1 } },
     ]);
 
+    // Sessions Collection (for Better-auth)
+    await ensureCollection(db, COLLECTIONS.SESSIONS);
+    await createIndexes(db, COLLECTIONS.SESSIONS, [
+      { key: { token: 1 }, unique: true },
+      { key: { userId: 1 } },
+      { key: { expiresAt: 1 }, expireAfterSeconds: 0 }, // TTL index
+    ]);
+
+    // Verification Tokens Collection (for Better-auth)
+    await ensureCollection(db, COLLECTIONS.VERIFICATION_TOKENS);
+    await createIndexes(db, COLLECTIONS.VERIFICATION_TOKENS, [
+      { key: { identifier: 1, token: 1 } },
+      { key: { expiresAt: 1 }, expireAfterSeconds: 0 }, // TTL index
+    ]);
+
     // Profiles Collection
     await ensureCollection(db, COLLECTIONS.PROFILES);
     await createIndexes(db, COLLECTIONS.PROFILES, [

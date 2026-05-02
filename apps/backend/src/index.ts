@@ -2,6 +2,10 @@ import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { env, logger, connectDatabase, getDatabase, getRedis } from "./config";
+import { errorHandler } from "./middleware/error-handler";
+import { globalRateLimit } from "./middleware/rate-limit";
+import { authRoutes } from "./modules/auth/routes";
+import { userRoutes } from "./modules/users/routes";
 
 const app = new Elysia()
   .use(
@@ -43,43 +47,10 @@ const app = new Elysia()
       },
     }),
   )
-  .onError(({ code, error, set }) => {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorStack = error instanceof Error ? error.stack : undefined;
-
-    logger.error(
-      { code, error: errorMessage, stack: errorStack },
-      "Request error",
-    );
-
-    if (code === "VALIDATION") {
-      set.status = 400;
-      return {
-        success: false,
-        error: "Validation error",
-        message: errorMessage,
-      };
-    }
-
-    if (code === "NOT_FOUND") {
-      set.status = 404;
-      return {
-        success: false,
-        error: "Not found",
-        message: "The requested resource was not found",
-      };
-    }
-
-    set.status = 500;
-    return {
-      success: false,
-      error: "Internal server error",
-      message:
-        env.APP_ENV === "development"
-          ? errorMessage
-          : "An unexpected error occurred",
-    };
-  })
+  // Enhanced error handling middleware
+  .use(errorHandler)
+  // Global rate limiting (optional - can be enabled per route)
+  // .onBeforeHandle(globalRateLimit())
   .get(
     "/health",
     async () => {
@@ -142,7 +113,11 @@ const app = new Elysia()
         description: "Get basic information about the API",
       },
     },
-  );
+  )
+  // Mount authentication routes
+  .use(authRoutes)
+  // Mount user management routes
+  .use(userRoutes);
 
 // Initialize database connection before starting server
 async function startServer() {

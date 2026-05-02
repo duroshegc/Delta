@@ -6,6 +6,8 @@ import type { ObjectId } from "mongodb";
 
 export const COLLECTIONS = {
   USERS: "users",
+  SESSIONS: "sessions",
+  VERIFICATION_TOKENS: "verification_tokens",
   PROFILES: "profiles",
   MEDIA: "media",
   LIKES: "likes",
