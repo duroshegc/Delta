@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0A0A0F; font-family: 'DM Sans', sans-serif; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+  .label { font-size: 10px; font-weight: 500; color: #5C5C78; letter-spacing: 0.08em; text-transform: uppercase; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  .badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 9999px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .badge-sm { padding: 3px 10px; font-size: 11px; }
+  .badge-md { padding: 5px 14px; font-size: 13px; }
+
+  .badge-accent   { background: rgba(236,72,153,0.15); border: 1px solid rgba(236,72,153,0.3); color: #F97316; }
+  .badge-live     { background: rgba(0,212,170,0.12); border: 1px solid rgba(0,212,170,0.25); color: #00D4AA; }
+  .badge-delt     { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.25); color: #F59E0B; }
+  .badge-success  { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.2); color: #22C55E; }
+  .badge-danger   { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.2); color: #EF4444; }
+  .badge-neutral  { background: #1E1E2A; border: 1px solid #28283A; color: #A0A0B8; }
+  .badge-solid    { background: linear-gradient(135deg,#EC4899,#F97316); color: #fff; border: none; }
+  .badge-solid-live { background: linear-gradient(135deg,#00D4AA,#EC4899); color: #fff; border: none; }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-live { background: #00D4AA; animation: pulse 1.5s infinite; }
+  .dot-success { background: #22C55E; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+  /* Interest chips */
+  .chip { background: #1E1E2A; border: 1px solid #28283A; border-radius: 9999px; padding: 6px 14px; font-size: 13px; color: #A0A0B8; cursor: pointer; transition: all 150ms; }
+  .chip-selected { background: rgba(236,72,153,0.15); border-color: rgba(236,72,153,0.4); color: #F97316; }
+
+  /* Trust score */
+  .trust { display: flex; align-items: center; gap: 8px; }
+  .trust-bar { width: 80px; height: 6px; border-radius: 3px; background: #1E1E2A; overflow: hidden; }
+  .trust-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#EC4899,#22C55E); }
+  .trust-val { font-size: 12px; color: #22C55E; font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="label">Status Badges</div>
+  <div class="row">
+    <div class="badge badge-md badge-accent"><div class="dot" style="background:#EC4899;"></div> Dating</div>
+    <div class="badge badge-md badge-live"><div class="dot dot-live"></div> Live now</div>
+    <div class="badge badge-md badge-delt">⬡ 24 delt</div>
+    <div class="badge badge-md badge-success"><div class="dot dot-success"></div> Verified</div>
+    <div class="badge badge-md badge-danger">Banned</div>
+    <div class="badge badge-md badge-neutral">Pending review</div>
+  </div>
+
+  <div class="label">Solid Badges</div>
+  <div class="row">
+    <div class="badge badge-md badge-solid">New match</div>
+    <div class="badge badge-md badge-solid-live">Live session</div>
+    <div class="badge badge-sm badge-solid">PRO</div>
+  </div>
+
+  <div class="label">Interest Chips</div>
+  <div class="row">
+    <div class="chip chip-selected">Hiking</div>
+    <div class="chip chip-selected">Photography</div>
+    <div class="chip">Music</div>
+    <div class="chip">Travel</div>
+    <div class="chip chip-selected">Coffee</div>
+    <div class="chip">Fitness</div>
+    <div class="chip">Gaming</div>
+  </div>
+
+  <div class="label">Trust Score</div>
+  <div class="row">
+    <div class="trust">
+      <div class="trust-bar"><div class="trust-fill" style="width:82%;"></div></div>
+      <div class="trust-val">82</div>
+      <div class="badge badge-sm badge-success">High trust</div>
+    </div>
+    <div class="trust">
+      <div class="trust-bar"><div class="trust-fill" style="width:34%; background:linear-gradient(90deg,#EF4444,#F59E0B);"></div></div>
+      <div class="trust-val" style="color:#EF4444;">34</div>
+      <div class="badge badge-sm badge-danger">Low trust</div>
+    </div>
+  </div>
+</body>
+</html>

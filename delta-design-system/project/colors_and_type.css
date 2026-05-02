@@ -1,0 +1,271 @@
+/* ============================================================
+   DELTA DESIGN SYSTEM — colors_and_type.css
+   Dark-mode first. Mobile-first.
+   Fonts: Plus Jakarta Sans (display) + Plus Jakarta Sans (body) via Google Fonts
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+/* ============================================================
+   COLOR TOKENS — Base Palette
+   ============================================================ */
+:root {
+
+  /* --- Backgrounds --- */
+  --delta-black:      #0A0A0F;   /* Primary background (deepest dark) */
+  --delta-surface:    #13131A;   /* Card / sheet backgrounds */
+  --delta-surface-2:  #1E1E2A;   /* Elevated surfaces, input fills */
+  --delta-surface-3:  #28283A;   /* Borders, dividers */
+  --delta-surface-4:  #33334A;   /* Hover states on surfaces */
+
+  /* --- Brand Accents --- */
+  --delta-accent:     #EC4899;   /* Primary pink — CTAs, brand */
+  --delta-accent-dim: #C4306A;   /* Pressed / darkened accent */
+  --delta-accent-glow:rgba(236, 72, 153, 0.35);
+  --delta-accent-2:   #F97316;   /* Secondary orange — gradients */
+
+  /* --- Feature Colors --- */
+  --delta-live:       #00D4AA;   /* Live session teal */
+  --delta-live-dim:   #00A882;   /* Pressed live */
+  --delta-live-glow:  rgba(0, 212, 170, 0.35);
+  --delta-delt:       #F59E0B;   /* delt token gold */
+  --delta-delt-dim:   #D97706;
+  --delta-delt-glow:  rgba(245, 158, 11, 0.35);
+
+  /* --- Semantic Colors --- */
+  --delta-success:    #22C55E;
+  --delta-success-bg: rgba(34, 197, 94, 0.12);
+  --delta-danger:     #EF4444;
+  --delta-danger-bg:  rgba(239, 68, 68, 0.12);
+  --delta-warning:    #F59E0B;
+  --delta-warning-bg: rgba(245, 158, 11, 0.12);
+  --delta-info:       #3B82F6;
+  --delta-info-bg:    rgba(59, 130, 246, 0.12);
+
+  /* --- Foreground / Text --- */
+  --delta-fg:         #F8F8FC;   /* Primary text */
+  --delta-fg-2:       #A0A0B8;   /* Secondary text */
+  --delta-fg-3:       #5C5C78;   /* Muted / placeholder */
+  --delta-fg-inv:     #0A0A0F;   /* Text on light backgrounds */
+
+  /* ============================================================
+     GRADIENT TOKENS
+     ============================================================ */
+  --grad-brand:      linear-gradient(135deg, #EC4899 0%, #F97316 100%);
+  --grad-live:       linear-gradient(135deg, #00D4AA 0%, #EC4899 100%);
+  --grad-delt:       linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+  --grad-dark:       linear-gradient(180deg, #13131A 0%, #0A0A0F 100%);
+  --grad-card-overlay: linear-gradient(to top, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.4) 50%, transparent 100%);
+  --grad-frosted:    linear-gradient(135deg, rgba(30,30,42,0.85) 0%, rgba(19,19,26,0.90) 100%);
+
+  /* ============================================================
+     TYPOGRAPHY TOKENS
+     ============================================================ */
+
+  /* Font families */
+  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+
+  /* Type scale */
+  --t-display-size:   32px;
+  --t-display-weight: 800;
+  --t-display-lh:     1.15;
+  --t-display-ls:     -0.02em;
+
+  --t-h1-size:        24px;
+  --t-h1-weight:      700;
+  --t-h1-lh:          1.25;
+  --t-h1-ls:          -0.01em;
+
+  --t-h2-size:        20px;
+  --t-h2-weight:      600;
+  --t-h2-lh:          1.3;
+  --t-h2-ls:          -0.005em;
+
+  --t-h3-size:        17px;
+  --t-h3-weight:      600;
+  --t-h3-lh:          1.35;
+  --t-h3-ls:          0;
+
+  --t-body-size:      15px;
+  --t-body-weight:    400;
+  --t-body-lh:        1.55;
+  --t-body-ls:        0;
+
+  --t-label-size:     13px;
+  --t-label-weight:   500;
+  --t-label-lh:       1.3;
+  --t-label-ls:       0.005em;
+
+  --t-caption-size:   11px;
+  --t-caption-weight: 400;
+  --t-caption-lh:     1.4;
+  --t-caption-ls:     0.01em;
+
+  /* ============================================================
+     SPACING TOKENS (4px base grid)
+     ============================================================ */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ============================================================
+     BORDER RADIUS
+     ============================================================ */
+  --radius-xs:   4px;
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-xl:   28px;
+  --radius-2xl:  36px;
+  --radius-full: 9999px;
+
+  /* ============================================================
+     SHADOWS / ELEVATION
+     ============================================================ */
+  --shadow-sm:     0 2px 8px rgba(0,0,0,0.4);
+  --shadow-md:     0 8px 24px rgba(0,0,0,0.5);
+  --shadow-lg:     0 20px 48px rgba(0,0,0,0.6);
+  --shadow-xl:     0 32px 64px rgba(0,0,0,0.7);
+  --glow-accent:   0 0 24px rgba(236,72,153,0.4);
+  --glow-live:     0 0 24px rgba(0,212,170,0.4);
+  --glow-delt:     0 0 24px rgba(245,158,11,0.4);
+
+  /* ============================================================
+     ANIMATION EASING
+     ============================================================ */
+  --ease-out:    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --dur-micro:   150ms;
+  --dur-fast:    200ms;
+  --dur-std:     300ms;
+  --dur-slow:    500ms;
+
+  /* ============================================================
+     COMPONENT TOKENS
+     ============================================================ */
+
+  /* Bottom nav */
+  --nav-height:  64px;
+  --nav-bg:      rgba(10,10,15,0.85);
+
+  /* Input */
+  --input-bg:    var(--delta-surface-2);
+  --input-border: var(--delta-surface-3);
+  --input-focus-border: var(--delta-accent);
+  --input-radius: var(--radius-md);
+  --input-padding: 14px 16px;
+
+  /* Button heights */
+  --btn-height-sm: 36px;
+  --btn-height-md: 48px;
+  --btn-height-lg: 56px;
+
+  /* Avatar sizes */
+  --avatar-sm:   32px;
+  --avatar-md:   48px;
+  --avatar-lg:   64px;
+  --avatar-xl:   96px;
+}
+
+/* ============================================================
+   SEMANTIC UTILITY CLASSES
+   ============================================================ */
+
+/* Base reset */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--delta-black);
+  color: var(--delta-fg);
+  font-family: var(--font-body);
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-lh);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Typography classes */
+.t-display {
+  font-family: var(--font-display);
+  font-size: var(--t-display-size);
+  font-weight: var(--t-display-weight);
+  line-height: var(--t-display-lh);
+  letter-spacing: var(--t-display-ls);
+}
+
+.t-h1 {
+  font-family: var(--font-display);
+  font-size: var(--t-h1-size);
+  font-weight: var(--t-h1-weight);
+  line-height: var(--t-h1-lh);
+  letter-spacing: var(--t-h1-ls);
+}
+
+.t-h2 {
+  font-family: var(--font-display);
+  font-size: var(--t-h2-size);
+  font-weight: var(--t-h2-weight);
+  line-height: var(--t-h2-lh);
+  letter-spacing: var(--t-h2-ls);
+}
+
+.t-h3 {
+  font-family: var(--font-body);
+  font-size: var(--t-h3-size);
+  font-weight: var(--t-h3-weight);
+  line-height: var(--t-h3-lh);
+}
+
+.t-body {
+  font-family: var(--font-body);
+  font-size: var(--t-body-size);
+  font-weight: var(--t-body-weight);
+  line-height: var(--t-body-lh);
+}
+
+.t-label {
+  font-family: var(--font-body);
+  font-size: var(--t-label-size);
+  font-weight: var(--t-label-weight);
+  line-height: var(--t-label-lh);
+  letter-spacing: var(--t-label-ls);
+}
+
+.t-caption {
+  font-family: var(--font-body);
+  font-size: var(--t-caption-size);
+  font-weight: var(--t-caption-weight);
+  line-height: var(--t-caption-lh);
+  letter-spacing: var(--t-caption-ls);
+}
+
+/* Color utilities */
+.fg-1    { color: var(--delta-fg); }
+.fg-2    { color: var(--delta-fg-2); }
+.fg-3    { color: var(--delta-fg-3); }
+.c-accent { color: var(--delta-accent); }
+.c-live  { color: var(--delta-live); }
+.c-delt  { color: var(--delta-delt); }
+
+/* Background utilities */
+.bg-black    { background: var(--delta-black); }
+.bg-surface  { background: var(--delta-surface); }
+.bg-surface-2{ background: var(--delta-surface-2); }
+.bg-accent   { background: var(--delta-accent); }
+.bg-live     { background: var(--delta-live); }
+
+/* Gradient utilities */
+.grad-brand { background: var(--grad-brand); }
+.grad-live  { background: var(--grad-live); }
+.grad-delt  { background: var(--grad-delt); }
