@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0A0A0F; font-family: 'DM Sans', sans-serif; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .label { font-size: 10px; font-weight: 500; color: #5C5C78; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; }
+
+  /* Base button */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; border-radius: 9999px; transition: all 200ms; outline: none; }
+
+  /* Sizes */
+  .btn-sm { height: 36px; padding: 0 16px; font-size: 13px; }
+  .btn-md { height: 48px; padding: 0 24px; font-size: 15px; }
+  .btn-lg { height: 56px; padding: 0 32px; font-size: 16px; }
+
+  /* Variants */
+  .btn-primary { background: linear-gradient(135deg,#EC4899,#F97316); color: #fff; box-shadow: 0 4px 16px rgba(236,72,153,0.4); }
+  .btn-secondary { background: #1E1E2A; color: #F8F8FC; border: 1px solid #28283A; }
+  .btn-live { background: linear-gradient(135deg,#00D4AA,#EC4899); color: #fff; box-shadow: 0 4px 16px rgba(0,212,170,0.3); }
+  .btn-delt { background: linear-gradient(135deg,#F59E0B,#EF4444); color: #fff; box-shadow: 0 4px 16px rgba(245,158,11,0.3); }
+  .btn-ghost { background: transparent; color: #A0A0B8; border: 1px solid #28283A; }
+  .btn-danger { background: rgba(239,68,68,0.12); color: #EF4444; border: 1px solid rgba(239,68,68,0.2); }
+  .btn-disabled { background: #1E1E2A; color: #5C5C78; opacity: 0.45; cursor: not-allowed; border: 1px solid #28283A; }
+
+  /* icon circle */
+  .btn-icon { width: 48px; height: 48px; padding: 0; border-radius: 50%; }
+  .btn-icon-sm { width: 36px; height: 36px; padding: 0; border-radius: 50%; font-size: 16px; }
+
+  /* full width */
+  .btn-full { width: 100%; border-radius: 14px; }
+</style>
+</head>
+<body>
+  <div class="label">Primary</div>
+  <div class="row">
+    <button class="btn btn-primary btn-sm">Let's go</button>
+    <button class="btn btn-primary btn-md">Continue</button>
+    <button class="btn btn-primary btn-lg">Start matching</button>
+  </div>
+
+  <div class="label">Secondary / Ghost</div>
+  <div class="row">
+    <button class="btn btn-secondary btn-sm">Skip for now</button>
+    <button class="btn btn-secondary btn-md">Edit profile</button>
+    <button class="btn btn-ghost btn-md">Learn more</button>
+  </div>
+
+  <div class="label">Live &amp; delt</div>
+  <div class="row">
+    <button class="btn btn-live btn-md">Go live</button>
+    <button class="btn btn-delt btn-md">⬡ Buy delt</button>
+    <button class="btn btn-danger btn-md">Report</button>
+  </div>
+
+  <div class="label">Icon &amp; Disabled</div>
+  <div class="row">
+    <button class="btn btn-primary btn-icon">♥</button>
+    <button class="btn btn-secondary btn-icon">✕</button>
+    <button class="btn btn-live btn-icon">▶</button>
+    <button class="btn btn-disabled btn-md" disabled>Unavailable</button>
+  </div>
+
+  <div class="label">Full Width</div>
+  <div class="row" style="flex-direction:column;">
+    <button class="btn btn-primary btn-md btn-full">Create account</button>
+    <button class="btn btn-secondary btn-md btn-full">Sign in</button>
+  </div>
+</body>
+</html>

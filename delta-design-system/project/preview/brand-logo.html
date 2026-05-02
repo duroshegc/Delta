@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #FEF0EC; font-family: 'DM Sans', sans-serif; padding: 24px 28px; display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+  .label { font-size: 10px; font-weight: 500; color: #A87888; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+
+  .logo-row { display: flex; align-items: center; gap: 12px; }
+  .logo-wordmark {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  /* Logo on white */
+  .logo-light { background: #FFFFFF; padding: 20px 24px; border-radius: 16px; border: 1px solid #E4E2F0; box-shadow: 0 2px 12px rgba(236,72,153,0.08); }
+  .logo-light .logo-wordmark { color: #1C0F14; }
+
+  /* Logo on soft lavender */
+  .logo-lavender { background: #FDF0ED; padding: 20px 24px; border-radius: 16px; border: 1px solid #F5DDD8; box-shadow: 0 2px 12px rgba(236,72,153,0.1); }
+  .logo-lavender .logo-wordmark { color: #1C0F14; }
+
+  /* Logo on accent gradient */
+  .logo-accent { background: linear-gradient(135deg, #EC4899, #F97316); padding: 20px 24px; border-radius: 16px; box-shadow: 0 6px 20px rgba(236,72,153,0.35); }
+  .logo-accent .logo-wordmark { color: #fff; }
+
+  /* App icon */
+  .app-icon {
+    width: 80px; height: 80px; border-radius: 20px;
+    background: linear-gradient(135deg, #EC4899, #F97316);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 20px rgba(236,72,153,0.35);
+    position: relative; overflow: hidden;
+  }
+
+  /* Tagline */
+  .tagline { font-family: 'DM Sans', sans-serif; font-size: 13px; color: #A87888; font-style: italic; margin-top: 8px; }
+  .tagline-dark { color: rgba(255,255,255,0.65); }
+</style>
+</head>
+<body>
+  <!-- Logo on white -->
+  <div>
+    <div class="label">Logo — White bg</div>
+    <div class="logo-light">
+      <div class="logo-row">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="18,2 34,34 2,34" fill="url(#lg1)"/>
+          <polygon points="18,12 28,30 8,30" fill="#FFFFFF"/>
+          <defs>
+            <linearGradient id="lg1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#EC4899"/>
+              <stop offset="100%" stop-color="#F97316"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="logo-wordmark" style="color:#1C0F14;">Delta</div>
+      </div>
+      <div class="tagline">Find your connection.</div>
+    </div>
+  </div>
+
+  <!-- Logo on soft lavender -->
+  <div>
+    <div class="label">Logo — Lavender bg</div>
+    <div class="logo-lavender">
+      <div class="logo-row">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="18,2 34,34 2,34" fill="url(#lg2)"/>
+          <polygon points="18,12 28,30 8,30" fill="#FDF0ED"/>
+          <defs>
+            <linearGradient id="lg2" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#EC4899"/>
+              <stop offset="100%" stop-color="#F97316"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="logo-wordmark" style="color:#1C0F14;">Delta</div>
+      </div>
+      <div class="tagline">Find your connection.</div>
+    </div>
+  </div>
+
+  <!-- Logo on gradient -->
+  <div>
+    <div class="label">Logo — Gradient bg</div>
+    <div class="logo-accent">
+      <div class="logo-row">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="18,2 34,34 2,34" fill="rgba(255,255,255,0.92)"/>
+          <polygon points="18,12 28,30 8,30" fill="rgba(236,72,153,0.6)"/>
+        </svg>
+        <div class="logo-wordmark" style="color:#fff;">Delta</div>
+      </div>
+      <div class="tagline tagline-dark">Find your connection.</div>
+    </div>
+  </div>
+
+  <!-- App Icon -->
+  <div>
+    <div class="label">App Icon</div>
+    <div class="app-icon">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="20,4 38,36 2,36" fill="rgba(255,255,255,0.93)"/>
+        <polygon points="20,15 31,33 9,33" fill="rgba(236,72,153,0.65)"/>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

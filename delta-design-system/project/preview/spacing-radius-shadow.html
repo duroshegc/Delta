@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0A0A0F; font-family: 'DM Sans', sans-serif; padding: 20px; display: flex; gap: 20px; flex-wrap: wrap; }
+  .section { display: flex; flex-direction: column; gap: 10px; }
+  .label { font-size: 10px; font-weight: 500; color: #5C5C78; letter-spacing: 0.08em; text-transform: uppercase; }
+  /* radius showcase */
+  .radii { display: flex; gap: 10px; align-items: flex-end; }
+  .rbox { background: #1E1E2A; border: 1px solid #28283A; width: 52px; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 6px; }
+  .rtag { font-size: 8px; color: #5C5C78; text-align: center; margin-top: 4px; }
+  /* shadow showcase */
+  .shadows { display: flex; gap: 14px; align-items: center; }
+  .sbox { background: #1E1E2A; width: 60px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .stag { font-size: 8px; color: #5C5C78; text-align: center; margin-top: 6px; }
+  .swrap { display: flex; flex-direction: column; align-items: center; }
+</style>
+</head>
+<body>
+  <div class="section">
+    <div class="label">Border Radius</div>
+    <div class="radii">
+      <div>
+        <div class="rbox" style="border-radius:4px;"></div>
+        <div class="rtag">xs · 4px</div>
+      </div>
+      <div>
+        <div class="rbox" style="border-radius:8px;"></div>
+        <div class="rtag">sm · 8px</div>
+      </div>
+      <div>
+        <div class="rbox" style="border-radius:12px;"></div>
+        <div class="rtag">md · 12px</div>
+      </div>
+      <div>
+        <div class="rbox" style="border-radius:20px;"></div>
+        <div class="rtag">lg · 20px</div>
+      </div>
+      <div>
+        <div class="rbox" style="border-radius:28px;"></div>
+        <div class="rtag">xl · 28px</div>
+      </div>
+      <div>
+        <div class="rbox" style="border-radius:9999px;"></div>
+        <div class="rtag">full</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">Elevation / Shadow</div>
+    <div class="shadows">
+      <div class="swrap">
+        <div class="sbox" style="box-shadow:0 2px 8px rgba(0,0,0,0.4);"></div>
+        <div class="stag">sm</div>
+      </div>
+      <div class="swrap">
+        <div class="sbox" style="box-shadow:0 8px 24px rgba(0,0,0,0.5);"></div>
+        <div class="stag">md</div>
+      </div>
+      <div class="swrap">
+        <div class="sbox" style="box-shadow:0 20px 48px rgba(0,0,0,0.6);"></div>
+        <div class="stag">lg</div>
+      </div>
+      <div class="swrap">
+        <div class="sbox" style="box-shadow:0 0 24px rgba(108,92,231,0.4);"></div>
+        <div class="stag">glow-accent</div>
+      </div>
+      <div class="swrap">
+        <div class="sbox" style="box-shadow:0 0 24px rgba(0,212,170,0.4);"></div>
+        <div class="stag">glow-live</div>
+      </div>
+      <div class="swrap">
+        <div class="sbox" style="box-shadow:0 0 24px rgba(245,158,11,0.4);"></div>
+        <div class="stag">glow-delt</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

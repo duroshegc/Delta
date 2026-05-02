@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0A0A0F; font-family: 'DM Sans', sans-serif; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .label { font-size: 10px; font-weight: 500; color: #5C5C78; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid #1E1E2A;
+    border-radius: 20px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 8px;
+    width: 100%;
+  }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 12px; border-radius: 12px; cursor: pointer; position: relative; }
+  .nav-item.active .nav-icon { color: #EC4899; }
+  .nav-item.active .nav-label { color: #EC4899; }
+  .nav-icon { color: #5C5C78; transition: color 200ms; }
+  .nav-label { font-size: 10px; font-weight: 500; color: #5C5C78; transition: color 200ms; }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 20px; height: 2px;
+    background: linear-gradient(135deg, #EC4899, #F97316);
+    border-radius: 0 0 2px 2px;
+  }
+  .nav-live { position: relative; }
+  .nav-live-btn {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, #00D4AA, #EC4899);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 20px rgba(0,212,170,0.4);
+    margin-bottom: 4px;
+  }
+  .nav-live-btn svg { color: #fff; }
+  .nav-live .nav-label { color: #00D4AA; }
+
+  /* Notification dot */
+  .notif-dot {
+    position: absolute; top: 6px; right: 6px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: linear-gradient(135deg, #EC4899, #F97316);
+    border: 2px solid #0A0A0F;
+  }
+</style>
+</head>
+<body>
+  <div class="label">Bottom Navigation</div>
+  <div class="bottom-nav">
+    <div class="nav-item active">
+      <div class="nav-icon"><i data-lucide="compass" width="22" height="22"></i></div>
+      <div class="nav-label">Discover</div>
+    </div>
+    <div class="nav-item" style="position:relative;">
+      <div class="nav-icon"><i data-lucide="heart" width="22" height="22"></i></div>
+      <div class="nav-label">Matches</div>
+      <div class="notif-dot"></div>
+    </div>
+    <div class="nav-item nav-live">
+      <div class="nav-live-btn"><i data-lucide="video" width="22" height="22" color="white"></i></div>
+      <div class="nav-label">Live</div>
+    </div>
+    <div class="nav-item" style="position:relative;">
+      <div class="nav-icon"><i data-lucide="message-circle" width="22" height="22"></i></div>
+      <div class="nav-label">Chat</div>
+      <div class="notif-dot" style="background:linear-gradient(135deg,#F59E0B,#EF4444);"></div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon"><i data-lucide="user" width="22" height="22"></i></div>
+      <div class="nav-label">Profile</div>
+    </div>
+  </div>
+</body>
+</html>

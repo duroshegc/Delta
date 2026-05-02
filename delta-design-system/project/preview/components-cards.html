@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0A0A0F; font-family: 'DM Sans', sans-serif; padding: 20px; display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+
+  /* Profile Card */
+  .profile-card {
+    width: 200px;
+    height: 280px;
+    border-radius: 28px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .profile-card-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, #2D1B69 0%, #1A0F3A 40%, #0D0D1A 100%);
+  }
+  .profile-card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.3) 55%, transparent 100%);
+  }
+  .profile-card-content {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 16px;
+  }
+  .profile-card-avatar {
+    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(135deg, #EC4899, #F97316);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 700; color: #fff;
+    box-shadow: 0 0 24px rgba(236,72,153,0.5);
+  }
+  .profile-card-name { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: #F8F8FC; letter-spacing: -0.01em; }
+  .profile-card-sub { font-size: 12px; color: #A0A0B8; margin-top: 2px; }
+  .profile-card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+  .profile-tag { background: rgba(236,72,153,0.2); border: 1px solid rgba(236,72,153,0.3); border-radius: 20px; padding: 3px 9px; font-size: 10px; color: #F97316; font-weight: 500; }
+  .verified-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: #22C55E; margin-top: 4px; }
+
+  /* Feed / chat card */
+  .feed-card {
+    background: #13131A;
+    border: 1px solid #28283A;
+    border-radius: 16px;
+    padding: 14px 16px;
+    width: 240px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .feed-card-header { display: flex; align-items: center; gap: 10px; }
+  .feed-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #00D4AA, #EC4899); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #fff; font-size: 15px; flex-shrink: 0; }
+  .feed-name { font-weight: 600; font-size: 14px; color: #F8F8FC; }
+  .feed-time { font-size: 11px; color: #5C5C78; }
+  .feed-msg { font-size: 13px; color: #A0A0B8; margin-top: 8px; line-height: 1.5; }
+  .feed-unread { background: linear-gradient(135deg, #EC4899, #F97316); color: #fff; font-size: 10px; font-weight: 700; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin-left: auto; }
+
+  /* Live card */
+  .live-card {
+    background: #13131A;
+    border: 1px solid rgba(0,212,170,0.25);
+    border-radius: 16px;
+    padding: 14px 16px;
+    width: 200px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(0,212,170,0.1);
+  }
+  .live-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(0,212,170,0.12); border: 1px solid rgba(0,212,170,0.25); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; color: #00D4AA; margin-bottom: 10px; }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #00D4AA; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  .live-name { font-weight: 600; font-size: 14px; color: #F8F8FC; }
+  .live-interest { font-size: 12px; color: #A0A0B8; margin-top: 3px; }
+  .live-meta { display: flex; gap: 12px; margin-top: 10px; }
+  .live-stat { font-size: 11px; color: #5C5C78; }
+  .live-stat span { color: #A0A0B8; font-weight: 500; }
+</style>
+</head>
+<body>
+  <!-- Profile Card -->
+  <div class="profile-card">
+    <div class="profile-card-bg"></div>
+    <div class="profile-card-avatar">A</div>
+    <div class="profile-card-overlay"></div>
+    <div class="profile-card-content">
+      <div class="profile-card-name">Alex, 27</div>
+      <div class="profile-card-sub">San Francisco, CA · 2 km</div>
+      <div class="verified-badge">✓ Verified</div>
+      <div class="profile-card-tags">
+        <span class="profile-tag">Hiking</span>
+        <span class="profile-tag">Photography</span>
+        <span class="profile-tag">Coffee</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feed / Chat Card -->
+  <div style="display:flex; flex-direction:column; gap:10px;">
+    <div class="feed-card">
+      <div class="feed-card-header">
+        <div class="feed-avatar">J</div>
+        <div>
+          <div class="feed-name">Jordan</div>
+          <div class="feed-time">2 min ago</div>
+        </div>
+        <div class="feed-unread">3</div>
+      </div>
+      <div class="feed-msg">Hey! I saw you're into photography too — where do you usually shoot? 📸</div>
+    </div>
+
+    <!-- Live Card -->
+    <div class="live-card">
+      <div class="live-badge"><div class="live-dot"></div> Live now</div>
+      <div class="live-name">Maya, 25</div>
+      <div class="live-interest">Interest: Travel &amp; Food</div>
+      <div class="live-meta">
+        <div class="live-stat"><span>4:32</span> elapsed</div>
+        <div class="live-stat"><span>18 delt</span> spent</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

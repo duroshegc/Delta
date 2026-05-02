@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0A0A0F; font-family: 'DM Sans', sans-serif; padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; }
+  .label { font-size: 10px; font-weight: 500; color: #5C5C78; letter-spacing: 0.08em; text-transform: uppercase; }
+  .row { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
+  .field-label { font-size: 12px; font-weight: 500; color: #A0A0B8; }
+  .input {
+    background: #1E1E2A;
+    border: 1px solid #28283A;
+    border-radius: 12px;
+    padding: 13px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: #F8F8FC;
+    outline: none;
+    width: 100%;
+    transition: border-color 200ms;
+  }
+  .input::placeholder { color: #5C5C78; }
+  .input-focus { border-color: #6C5CE7; box-shadow: 0 0 0 3px rgba(108,92,231,0.15); }
+  .input-error { border-color: #EF4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
+  .input-success { border-color: #22C55E; }
+  .helper { font-size: 11px; color: #5C5C78; }
+  .helper-err { font-size: 11px; color: #EF4444; }
+
+  .textarea {
+    background: #1E1E2A;
+    border: 1px solid #28283A;
+    border-radius: 12px;
+    padding: 13px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: #F8F8FC;
+    width: 100%;
+    resize: none;
+    height: 72px;
+  }
+  .textarea::placeholder { color: #5C5C78; }
+
+  .select {
+    background: #1E1E2A;
+    border: 1px solid #28283A;
+    border-radius: 12px;
+    padding: 13px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: #F8F8FC;
+    width: 100%;
+    appearance: none;
+  }
+
+  /* Toggle */
+  .toggle-row { display: flex; align-items: center; gap: 10px; }
+  .toggle { width: 48px; height: 28px; border-radius: 14px; background: #1E1E2A; border: 1px solid #28283A; position: relative; cursor: pointer; }
+  .toggle-on { background: linear-gradient(135deg, #6C5CE7, #A855F7); border-color: transparent; }
+  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #F8F8FC; transition: left 200ms; }
+  .toggle-on .toggle-thumb { left: 23px; }
+  .toggle-lbl { font-size: 14px; color: #A0A0B8; }
+</style>
+</head>
+<body>
+  <div class="label">Text Inputs</div>
+  <div class="row">
+    <div class="field">
+      <div class="field-label">Default</div>
+      <input class="input" placeholder="Your name" />
+      <div class="helper">Used for display on your profile</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Focused</div>
+      <input class="input input-focus" placeholder="Email address" value="alex@" />
+    </div>
+    <div class="field">
+      <div class="field-label">Error</div>
+      <input class="input input-error" value="bad@" />
+      <div class="helper-err">Enter a valid email address</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Success</div>
+      <input class="input input-success" value="alex@mail.com" />
+    </div>
+  </div>
+
+  <div class="label">Textarea &amp; Select</div>
+  <div class="row">
+    <div class="field">
+      <div class="field-label">Bio</div>
+      <textarea class="textarea" placeholder="Tell people about yourself…"></textarea>
+    </div>
+    <div class="field">
+      <div class="field-label">Intent</div>
+      <select class="select">
+        <option>Dating</option>
+        <option>Friendship</option>
+        <option>Casual</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="label">Toggles</div>
+  <div class="row" style="gap:20px;">
+    <div class="toggle-row">
+      <div class="toggle toggle-on"><div class="toggle-thumb"></div></div>
+      <span class="toggle-lbl">Show distance</span>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle"><div class="toggle-thumb"></div></div>
+      <span class="toggle-lbl">Push notifications</span>
+    </div>
+  </div>
+</body>
+</html>
