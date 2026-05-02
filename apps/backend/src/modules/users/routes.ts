@@ -10,6 +10,9 @@ import {
   validatePasswordStrength,
 } from "../../lib/password";
 import { revokeAllUserSessions } from "../../lib/auth-service";
+import { DEFAULT_PREFERENCES } from "../../types/preferences";
+import { updatePreferencesSchema } from "./schemas";
+import { COLLECTIONS } from "../../types/database";
 
 /**
  * User management routes
@@ -20,6 +23,10 @@ import { revokeAllUserSessions } from "../../lib/auth-service";
  * - DELETE /me - Delete current user account
  * - PATCH /me/password - Change password
  * - PATCH /me/email - Change email (requires verification)
+ * - GET /me/preferences - Get user preferences
+ * - PATCH /me/preferences - Update user preferences
+ * - GET /me/status - Get account status
+ * - GET /me/stats - Get user statistics
  */
 
 export const userRoutes = new Elysia({ prefix: "/users" })
@@ -324,6 +331,220 @@ export const userRoutes = new Elysia({ prefix: "/users" })
         summary: "Delete account",
         description:
           "Permanently delete the authenticated user's account. Requires password and confirmation.",
+      },
+    },
+  )
+
+  // Get user preferences
+  .get(
+    "/me/preferences",
+    async (context) => {
+      const { user } = context as any;
+      const db = getDatabase();
+
+      // Try to get existing preferences
+      const userDoc = await db
+        .collection(COLLECTIONS.USERS)
+        .findOne(
+          { _id: new ObjectId(user.userId) },
+          { projection: { preferences: 1 } },
+        );
+
+      // If no preferences exist, return defaults
+      if (!userDoc || !userDoc.preferences) {
+        logger.debug(
+          { userId: user.userId },
+          "No preferences found, returning defaults",
+        );
+        return {
+          success: true,
+          data: DEFAULT_PREFERENCES,
+        };
+      }
+
+      logger.debug({ userId: user.userId }, "User preferences retrieved");
+
+      return {
+        success: true,
+        data: userDoc.preferences,
+      };
+    },
+    {
+      detail: {
+        tags: ["Users"],
+        summary: "Get user preferences",
+        description:
+          "Retrieve the authenticated user's privacy, notification, and discovery preferences",
+      },
+    },
+  )
+
+  // Update user preferences
+  .patch(
+    "/me/preferences",
+    async (context) => {
+      const { user, body } = context as any;
+      const db = getDatabase();
+
+      // Validate the request body
+      const validatedData = updatePreferencesSchema.parse(body);
+
+      // Get current preferences or use defaults
+      const currentUser = await db.collection(COLLECTIONS.USERS).findOne({
+        _id: new ObjectId(user.userId),
+      });
+
+      if (!currentUser) {
+        throw new NotFoundError("User not found");
+      }
+
+      const currentPreferences = currentUser.preferences || DEFAULT_PREFERENCES;
+
+      // Merge updates with current preferences
+      const updatedPreferences = {
+        privacy: {
+          ...currentPreferences.privacy,
+          ...(validatedData.privacy || {}),
+        },
+        notifications: {
+          ...currentPreferences.notifications,
+          ...(validatedData.notifications || {}),
+        },
+        discovery: {
+          ...currentPreferences.discovery,
+          ...(validatedData.discovery || {}),
+          ageRange:
+            validatedData.discovery?.ageRange ||
+            currentPreferences.discovery.ageRange,
+          intents:
+            validatedData.discovery?.intents ||
+            currentPreferences.discovery.intents,
+        },
+      };
+
+      // Update in database
+      await db.collection(COLLECTIONS.USERS).updateOne(
+        { _id: new ObjectId(user.userId) },
+        {
+          $set: {
+            preferences: updatedPreferences,
+            updatedAt: new Date(),
+          },
+        },
+      );
+
+      logger.info({ userId: user.userId }, "User preferences updated");
+
+      return {
+        success: true,
+        message: "Preferences updated successfully",
+        data: updatedPreferences,
+      };
+    },
+    {
+      body: t.Object({
+        privacy: t.Optional(
+          t.Object({
+            showOnlineStatus: t.Optional(t.Boolean()),
+            showLastSeen: t.Optional(t.Boolean()),
+            showDistance: t.Optional(t.Boolean()),
+            allowProfileViews: t.Optional(t.Boolean()),
+          }),
+        ),
+        notifications: t.Optional(
+          t.Object({
+            matches: t.Optional(t.Boolean()),
+            messages: t.Optional(t.Boolean()),
+            likes: t.Optional(t.Boolean()),
+            liveMatch: t.Optional(t.Boolean()),
+            email: t.Optional(t.Boolean()),
+            push: t.Optional(t.Boolean()),
+          }),
+        ),
+        discovery: t.Optional(
+          t.Object({
+            showMe: t.Optional(t.Boolean()),
+            ageRange: t.Optional(
+              t.Object({
+                min: t.Number({ minimum: 18, maximum: 100 }),
+                max: t.Number({ minimum: 18, maximum: 100 }),
+              }),
+            ),
+            maxDistance: t.Optional(t.Number({ minimum: 1, maximum: 500 })),
+            intents: t.Optional(
+              t.Array(
+                t.Union([
+                  t.Literal("serious"),
+                  t.Literal("casual"),
+                  t.Literal("friendship"),
+                  t.Literal("networking"),
+                ]),
+              ),
+            ),
+          }),
+        ),
+      }),
+      detail: {
+        tags: ["Users"],
+        summary: "Update user preferences",
+        description:
+          "Update the authenticated user's privacy, notification, and discovery preferences",
+      },
+    },
+  )
+
+  // Get account status
+  .get(
+    "/me/status",
+    async (context) => {
+      const { user } = context as any;
+      const db = getDatabase();
+
+      const userDoc = await db.collection(COLLECTIONS.USERS).findOne({
+        _id: new ObjectId(user.userId),
+      });
+
+      if (!userDoc) {
+        throw new NotFoundError("User not found");
+      }
+
+      // Build status response
+      const statusResponse: any = {
+        status: userDoc.status || "active",
+      };
+
+      // Add restrictions if any
+      if (userDoc.restrictions && userDoc.restrictions.length > 0) {
+        statusResponse.restrictions = userDoc.restrictions.map((r: any) => ({
+          type: r.type,
+          reason: r.reason,
+          expiresAt: r.expiresAt,
+          createdAt: r.createdAt,
+        }));
+      }
+
+      // Add warnings if any
+      if (userDoc.warnings && userDoc.warnings.length > 0) {
+        statusResponse.warnings = userDoc.warnings.map((w: any) => ({
+          message: w.message,
+          severity: w.severity,
+          createdAt: w.createdAt,
+        }));
+      }
+
+      logger.debug({ userId: user.userId }, "Account status retrieved");
+
+      return {
+        success: true,
+        data: statusResponse,
+      };
+    },
+    {
+      detail: {
+        tags: ["Users"],
+        summary: "Get account status",
+        description:
+          "Retrieve the authenticated user's account status, restrictions, and warnings",
       },
     },
   )

@@ -6,6 +6,9 @@ import { errorHandler } from "./middleware/error-handler";
 import { globalRateLimit } from "./middleware/rate-limit";
 import { authRoutes } from "./modules/auth/routes";
 import { userRoutes } from "./modules/users/routes";
+import { profileRoutes } from "./modules/profiles/routes";
+import { mediaRoutes } from "./modules/media/routes";
+import { discoveryRoutes } from "./modules/discovery/routes";
 
 const app = new Elysia()
   .use(
@@ -117,7 +120,13 @@ const app = new Elysia()
   // Mount authentication routes
   .use(authRoutes)
   // Mount user management routes
-  .use(userRoutes);
+  .use(userRoutes)
+  // Mount profile management routes
+  .use(profileRoutes)
+  // Mount media management routes
+  .use(mediaRoutes)
+  // Mount discovery routes
+  .use(discoveryRoutes);
 
 // Initialize database connection before starting server
 async function startServer() {
