@@ -30,7 +30,8 @@ export interface AuthUser {
  * Middleware to require authentication
  * Validates JWT token and attaches user to context
  */
-export const requireAuth = new Elysia({ name: "require-auth" }).derive(
+export const requireAuth = new Elysia({ name: "require-auth" }).resolve(
+  { as: "scoped" },
   async ({ headers }) => {
     const authHeader = headers.authorization;
     const token = extractTokenFromHeader(authHeader);
@@ -100,7 +101,9 @@ export const requireAuth = new Elysia({ name: "require-auth" }).derive(
  * @param allowedRoles - Array of allowed roles
  */
 export function requireRole(...allowedRoles: string[]) {
-  return new Elysia({ name: "require-role" }).derive(async ({ headers }) => {
+  return new Elysia({ name: `require-role:${allowedRoles.join(",")}` }).resolve(
+    { as: "scoped" },
+    async ({ headers }) => {
     // Re-authenticate to get user
     const authHeader = headers.authorization;
     const token = extractTokenFromHeader(authHeader);
@@ -152,7 +155,8 @@ export function requireRole(...allowedRoles: string[]) {
  * Middleware for optional authentication
  * Attaches user to context if token is valid, but doesn't require it
  */
-export const optionalAuth = new Elysia({ name: "optional-auth" }).derive(
+export const optionalAuth = new Elysia({ name: "optional-auth" }).resolve(
+  { as: "scoped" },
   async ({ headers }) => {
     const authHeader = headers.authorization;
     const token = extractTokenFromHeader(authHeader);
@@ -194,7 +198,8 @@ export const optionalAuth = new Elysia({ name: "optional-auth" }).derive(
  * Middleware to check if user is verified
  * Must be used after requireAuth
  */
-export const requireVerified = new Elysia({ name: "require-verified" }).derive(
+export const requireVerified = new Elysia({ name: "require-verified" }).resolve(
+  { as: "scoped" },
   async ({ headers }) => {
     // Re-authenticate to get user
     const authHeader = headers.authorization;
@@ -235,7 +240,8 @@ export const requireVerified = new Elysia({ name: "require-verified" }).derive(
  * Middleware to check if user account is not banned/suspended
  * Must be used after requireAuth
  */
-export const requireActive = new Elysia({ name: "require-active" }).derive(
+export const requireActive = new Elysia({ name: "require-active" }).resolve(
+  { as: "scoped" },
   async ({ headers }) => {
     // Re-authenticate to get user
     const authHeader = headers.authorization;

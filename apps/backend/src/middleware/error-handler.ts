@@ -9,7 +9,7 @@ import { env } from "../config/env";
  * Provides consistent error responses and logging
  */
 export function errorHandler(app: Elysia) {
-  return app.onError(({ code, error, set, request }) => {
+  return app.onError({ as: "global" }, ({ code, error, set, request }) => {
     const isDevelopment = env.APP_ENV === "development";
     const timestamp = new Date().toISOString();
     const path = new URL(request.url).pathname;
