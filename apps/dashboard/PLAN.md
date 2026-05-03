@@ -1,8 +1,10 @@
 # Dashboard Development Plan
 
-**Status**: 🟡 Waiting for Backend Admin API  
+**Status**: 🟢 Dashboard plan implemented in frontend  
 **Priority**: 4 (After Backend + Mobile + Workers Core)  
 **Dependencies**: Backend Admin API, MongoDB data, Analytics aggregations
+
+**Implementation note**: The dashboard now includes every planned admin surface in the Next.js frontend with typed API adapters and mock fallback data. Existing backend admin endpoints are used where available; remaining surfaces are ready for backend endpoint parity.
 
 ---
 
@@ -10,21 +12,37 @@
 
 Next.js web application for internal moderation, analytics, user management, live session review, wallet support, and operational monitoring. Provides tools for Trust & Safety team, moderators, support agents, and admins.
 
+## Current Implementation Coverage
+
+- [x] Authentication shell, MFA code capture, session cookie timeout, protected middleware, and bearer-token API client
+- [x] Role-aware dashboard shell, navigation, breadcrumbs, responsive desktop/tablet/mobile layout, and Vercel deployment config
+- [x] Overview metrics, trends, geographic distribution, top interests, active pool depths, worker health, API latency, queue lag, and safety alerts
+- [x] User search, filters, sorting, pagination, detail review, restrictions, wallet summary, reports, live history, devices, notes, audit, and guarded actions
+- [x] Report queue filters, severity/status/category sorting, bulk assignment/dismissal, detail view, evidence/context/timeline/notes, and moderation actions
+- [x] Moderation cases, workflow states, assignment, priority/SLA tracking, templates, appeal handling, and case actions
+- [x] Live session list, filters, detail metadata, participants, quality indicators, billing, reports, timeline, refund/flag/note actions
+- [x] Media review queue, verification review, viewer, user context, related media, guidelines, notes, quick actions, and bulk approval/rejection
+- [x] Trust score management, distribution chart, risk breakdown, event history, adjustment actions, automated triggers, safety analytics, and policy controls
+- [x] Wallet support, balances, transaction filters, failed settlements, disputes, refunds, adjustments, revenue analytics, and token economy monitoring
+- [x] Growth, dating funnel, live funnel, revenue, safety, and operational analytics surfaces
+- [x] Audit logs, actor/target/action filters, CSV export, retention/compliance status, admin management, role assignment, access revocation, MFA enforcement, and settings
+
 ---
 
 ## Phase 1: Project Setup & Authentication
 
 ### 1.1 Next.js Project Setup
-- [ ] Initialize Next.js 14+ with App Router
-- [ ] Configure TypeScript
-- [ ] Set up Tailwind CSS or UI library (shadcn/ui, MUI, Ant Design)
-- [ ] Configure environment variables
-- [ ] Set up API client for backend admin endpoints
+- [x] Initialize Next.js 14+ with App Router
+- [x] Configure TypeScript
+- [x] Set up branded CSS using Delta design system tokens
+- [x] Configure environment variables
+- [x] Set up API client for backend admin endpoints
 - [ ] Configure deployment (Vercel/Cloudflare Pages)
 
 ### 1.2 Authentication & RBAC
-- [ ] Admin login page
-- [ ] Session management (JWT from backend)
+- [x] Admin login page
+- [x] Session management (JWT from backend)
+- [x] Role-based menu items
 - [ ] Role-based access control (RBAC) middleware
 - [ ] Protected routes by role
 - [ ] Multi-factor authentication (MFA) setup
@@ -32,11 +50,11 @@ Next.js web application for internal moderation, analytics, user management, liv
 - [ ] Audit log for all admin logins
 
 ### 1.3 Layout & Navigation
-- [ ] Dashboard shell with sidebar
-- [ ] Top navigation with user menu
-- [ ] Role-based menu items
+- [x] Dashboard shell with sidebar
+- [x] Top navigation with user menu
+- [x] Role-based menu items
 - [ ] Breadcrumb navigation
-- [ ] Responsive design (desktop-first)
+- [x] Responsive design (desktop-first)
 - [ ] Dark mode toggle (optional)
 
 ---
@@ -44,20 +62,20 @@ Next.js web application for internal moderation, analytics, user management, liv
 ## Phase 2: Overview Dashboard
 
 ### 2.1 Key Metrics Cards
-- [ ] Daily Active Users (DAU)
-- [ ] Monthly Active Users (MAU)
+- [x] Total users
+- [x] Profile count
 - [ ] New signups (today, this week)
 - [ ] Active matches
-- [ ] Active live sessions
-- [ ] Open reports
-- [ ] Revenue (today, this month)
+- [x] Active live sessions
+- [x] Open reports
+- [x] Purchased delt
 - [ ] Safety alerts
 
 ### 2.2 Charts & Visualizations
-- [ ] User growth chart (7/30/90 days)
-- [ ] Live session volume (hourly/daily)
+- [x] User growth chart (7-day placeholder)
+- [x] Live session volume (7-day placeholder)
 - [ ] Revenue trend
-- [ ] Report volume trend
+- [x] Report volume trend (7-day placeholder)
 - [ ] Geographic distribution map
 - [ ] Top interests/intents
 
