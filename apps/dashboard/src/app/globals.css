@@ -293,6 +293,12 @@ h2 {
   font-size: 12px;
 }
 
+.status-strip .session-warning {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--delta-warning);
+}
+
 .toast {
   position: fixed;
   right: 24px;
@@ -1009,7 +1015,8 @@ h2 {
 }
 
 .field textarea,
-.field input {
+.field input,
+.field select {
   width: 100%;
   border: 1px solid var(--delta-surface-3);
   border-radius: var(--radius-md);
@@ -1025,9 +1032,28 @@ h2 {
 
 .field textarea:focus,
 .field input:focus,
+.field select:focus,
 .search-box:focus-within {
   border-color: var(--delta-accent);
   box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.12);
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--delta-fg-3);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--delta-surface-3);
 }
 
 @media (max-width: 1120px) {

@@ -118,6 +118,8 @@ const navItems: NavItem[] = [
 ];
 
 const pageSize = 5;
+const sessionDurationMs = 1000 * 60 * 60 * 8;
+const sessionWarningMs = 1000 * 60 * 15;
 
 export function AdminDashboard() {
   const [activeView, setActiveView] = useState<ViewKey>("overview");
@@ -126,6 +128,7 @@ export function AdminDashboard() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [role, setRole] = useState<AdminRole>("super_admin");
   const [toast, setToast] = useState("");
+  const [sessionExpiresAt, setSessionExpiresAt] = useState(0);
   const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
   const [selectedMediaIds, setSelectedMediaIds] = useState<string[]>([]);
   const [userFilters, setUserFilters] = useState({ query: "", status: "all", verification: "all", region: "all", minTrust: "0", sort: "createdAt" });
@@ -148,6 +151,7 @@ export function AdminDashboard() {
   useEffect(() => {
     const storedRole = window.localStorage.getItem("delta_admin_role") as AdminRole | null;
     if (storedRole && roleLabels[storedRole]) setRole(storedRole);
+    setSessionExpiresAt(readSessionExpiry());
   }, []);
 
   useEffect(() => {
@@ -157,7 +161,11 @@ export function AdminDashboard() {
       setLoading(true);
       const nextData = await adminApi.dashboard();
       if (!mounted) return;
+      const loginAudit = readPendingLoginAudit();
       setData(nextData);
+      if (loginAudit) {
+        setData((current) => (current ? { ...current, auditLogs: [loginAudit, ...current.auditLogs] } : current));
+      }
       setSelectedUserId((current) => current || nextData.users[0]?.id || "");
       setSelectedReportId((current) => current || nextData.reports[0]?.id || "");
       setSelectedSessionId((current) => current || nextData.sessions[0]?.sessionId || "");
@@ -184,7 +192,22 @@ export function AdminDashboard() {
 
   useEffect(() => {
     window.localStorage.setItem("delta_admin_role", role);
+    document.cookie = `delta_admin_role=${role}; path=/; max-age=${sessionDurationMs / 1000}; SameSite=Lax`;
   }, [role]);
+
+  useEffect(() => {
+    function checkSession() {
+      const expiresAt = readSessionExpiry();
+      setSessionExpiresAt(expiresAt);
+      if (expiresAt && Date.now() > expiresAt) {
+        clearSession();
+      }
+    }
+
+    checkSession();
+    const interval = window.setInterval(checkSession, 30000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   const visibleNav = navItems.filter((item) => canAccess(item.roles, role));
 
@@ -345,6 +368,11 @@ export function AdminDashboard() {
   }
 
   function handleCaseAction(caseId: string, action: string) {
+    if (!canModerate(role)) {
+      setToast("This role can view cases only");
+      return;
+    }
+
     const item = data?.cases.find((entry) => entry.id === caseId);
     if (!item) return;
     const reason = window.prompt(`Reason for ${humanize(action)}`);
@@ -369,6 +397,11 @@ export function AdminDashboard() {
   }
 
   function handleSessionAction(sessionId: string, action: string) {
+    if (!canReviewSessions(role)) {
+      setToast("This role can view live sessions only");
+      return;
+    }
+
     const session = data?.sessions.find((item) => item.sessionId === sessionId);
     if (!session) return;
     const reason = window.prompt(`Reason for ${humanize(action)}`);
@@ -391,6 +424,11 @@ export function AdminDashboard() {
   }
 
   function handleMediaAction(mediaId: string, action: MediaReviewItem["status"] | "request_reupload") {
+    if (!canModerate(role)) {
+      setToast("This role can view media only");
+      return;
+    }
+
     const item = data?.media.find((entry) => entry.id === mediaId);
     if (!item) return;
     const reason = action === "approved" ? "Approved after review" : window.prompt(`Reason for ${humanize(action)}`);
@@ -411,6 +449,11 @@ export function AdminDashboard() {
   }
 
   function handleBulkMedia(action: "approved" | "rejected") {
+    if (!canModerate(role)) {
+      setToast("This role can view media only");
+      return;
+    }
+
     if (!selectedMediaIds.length) return;
     const reason = action === "approved" ? "Bulk approval" : window.prompt("Bulk rejection reason");
     if (!reason) return;
@@ -539,7 +582,10 @@ export function AdminDashboard() {
   function clearSession() {
     window.localStorage.removeItem("delta_admin_token");
     window.localStorage.removeItem("delta_admin_role");
+    window.localStorage.removeItem("delta_admin_mfa");
+    window.localStorage.removeItem("delta_admin_session_expires_at");
     document.cookie = "delta_admin_session=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "delta_admin_role=; path=/; max-age=0; SameSite=Lax";
     window.location.href = "/login";
   }
 
@@ -588,6 +634,7 @@ export function AdminDashboard() {
     const actionMatch = auditAction === "all" || log.action.includes(auditAction);
     return queryMatch && actionMatch;
   });
+  const sessionRemainingMs = Math.max(0, sessionExpiresAt - Date.now());
 
   return (
     <main className="admin-shell">
@@ -653,6 +700,7 @@ export function AdminDashboard() {
           <span>{loading ? "Syncing admin data" : "Admin data ready"}</span>
           <span>{lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Waiting for first sync"}</span>
           <span>{roleLabels[role]}</span>
+          <span className={sessionRemainingMs < sessionWarningMs ? "session-warning" : undefined}>Session {formatSessionTime(sessionRemainingMs)}</span>
           <span>API: {process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}</span>
         </section>
 
@@ -701,6 +749,7 @@ export function AdminDashboard() {
             cases={filteredCases}
             selectedCase={selectedCase}
             status={caseStatus}
+            role={role}
             onStatusChange={setCaseStatus}
             onAction={handleCaseAction}
           />
@@ -712,6 +761,7 @@ export function AdminDashboard() {
             filters={sessionFilters}
             regions={sessionRegions}
             interests={sessionInterests}
+            role={role}
             onFilterChange={(key, value) => setSessionFilters((current) => ({ ...current, [key]: value } as typeof current))}
             onSelect={setSelectedSessionId}
             onAction={handleSessionAction}
@@ -723,6 +773,7 @@ export function AdminDashboard() {
             selectedMedia={selectedMedia}
             filters={mediaFilters}
             selectedIds={selectedMediaIds}
+            role={role}
             onFilterChange={(key, value) => setMediaFilters((current) => ({ ...current, [key]: value }))}
             onSelect={setSelectedMediaId}
             onToggle={(id) => setSelectedMediaIds((current) => toggleValue(current, id))}
@@ -1047,12 +1098,14 @@ function CasesView({
   cases,
   selectedCase,
   status,
+  role,
   onStatusChange,
   onAction,
 }: {
   cases: ModerationCase[];
   selectedCase: ModerationCase;
   status: string;
+  role: AdminRole;
   onStatusChange: (status: string) => void;
   onAction: (id: string, action: string) => void;
 }) {
@@ -1088,10 +1141,10 @@ function CasesView({
             {["Severe harassment", "Verification mismatch", "Spam or solicitation", "Unsafe live behavior"].map((template) => <span className="chip" key={template}>{template}</span>)}
           </div>
           <div className="action-grid">
-            <ActionButton icon={UserCog} label="Assign" onClick={() => onAction(selectedCase.id, "assign")} />
-            <ActionButton icon={AlertTriangle} label="Escalate" onClick={() => onAction(selectedCase.id, "escalate")} />
-            <ActionButton icon={CheckCircle2} label="Resolve" onClick={() => onAction(selectedCase.id, "resolve")} />
-            <ActionButton icon={MessageCircle} label="Appeal" onClick={() => onAction(selectedCase.id, "appeal")} />
+            <ActionButton disabled={!canModerate(role)} icon={UserCog} label="Assign" onClick={() => onAction(selectedCase.id, "assign")} />
+            <ActionButton disabled={!canModerate(role)} icon={AlertTriangle} label="Escalate" onClick={() => onAction(selectedCase.id, "escalate")} />
+            <ActionButton disabled={!canModerate(role)} icon={CheckCircle2} label="Resolve" onClick={() => onAction(selectedCase.id, "resolve")} />
+            <ActionButton disabled={!canModerate(role)} icon={MessageCircle} label="Appeal" onClick={() => onAction(selectedCase.id, "appeal")} />
           </div>
         </div>
       </section>
@@ -1105,6 +1158,7 @@ function SessionsView({
   filters,
   regions,
   interests,
+  role,
   onFilterChange,
   onSelect,
   onAction,
@@ -1114,10 +1168,13 @@ function SessionsView({
   filters: { query: string; status: string; region: string; interest: string; reportedOnly: boolean };
   regions: string[];
   interests: string[];
+  role: AdminRole;
   onFilterChange: (key: string, value: string | boolean) => void;
   onSelect: (id: string) => void;
   onAction: (id: string, action: string) => void;
 }) {
+  const canAct = canReviewSessions(role);
+
   return (
     <div className="view-stack">
       <FilterBar>
@@ -1155,11 +1212,11 @@ function SessionsView({
             {selectedSession.events.map((event, index) => <TimelineItem key={`${event.createdAt}-${index}`} label={humanize(event.type)} detail={`${event.detail} - ${formatDate(event.createdAt)}`} />)}
           </div>
           <div className="action-grid">
-            <ActionButton icon={Users} label="Profiles" onClick={() => onAction(selectedSession.sessionId, "view_profiles")} />
-            <ActionButton icon={Flag} label="Reports" onClick={() => onAction(selectedSession.sessionId, "review_reports")} />
-            <ActionButton icon={Coins} label="Refund" onClick={() => onAction(selectedSession.sessionId, "refund")} />
-            <ActionButton icon={AlertTriangle} label="Flag" onClick={() => onAction(selectedSession.sessionId, "flag")} />
-            <ActionButton icon={FileText} label="Note" onClick={() => onAction(selectedSession.sessionId, "note")} />
+            <ActionButton disabled={!canAct} icon={Users} label="Profiles" onClick={() => onAction(selectedSession.sessionId, "view_profiles")} />
+            <ActionButton disabled={!canAct} icon={Flag} label="Reports" onClick={() => onAction(selectedSession.sessionId, "review_reports")} />
+            <ActionButton disabled={!canAct} icon={Coins} label="Refund" onClick={() => onAction(selectedSession.sessionId, "refund")} />
+            <ActionButton disabled={!canAct} icon={AlertTriangle} label="Flag" onClick={() => onAction(selectedSession.sessionId, "flag")} />
+            <ActionButton disabled={!canAct} icon={FileText} label="Note" onClick={() => onAction(selectedSession.sessionId, "note")} />
           </div>
         </div>
       </section>
@@ -1172,6 +1229,7 @@ function MediaView({
   selectedMedia,
   filters,
   selectedIds,
+  role,
   onFilterChange,
   onSelect,
   onToggle,
@@ -1182,19 +1240,22 @@ function MediaView({
   selectedMedia: MediaReviewItem;
   filters: Record<string, string>;
   selectedIds: string[];
+  role: AdminRole;
   onFilterChange: (key: string, value: string) => void;
   onSelect: (id: string) => void;
   onToggle: (id: string) => void;
   onBulk: (action: "approved" | "rejected") => void;
   onAction: (id: string, action: MediaReviewItem["status"] | "request_reupload") => void;
 }) {
+  const canAct = canModerate(role);
+
   return (
     <div className="view-stack">
       <FilterBar>
         <Select value={filters.status} onChange={(value) => onFilterChange("status", value)} options={["all", "pending", "approved", "rejected", "flagged", "escalated"]} />
         <Select value={filters.type} onChange={(value) => onFilterChange("type", value)} options={["all", "profile_image", "profile_video", "verification_selfie", "verification_video", "chat_media", "report_evidence"]} />
-        <button className="secondary-action" type="button" disabled={!selectedIds.length} onClick={() => onBulk("approved")}><Check size={18} />Approve</button>
-        <button className="secondary-action" type="button" disabled={!selectedIds.length} onClick={() => onBulk("rejected")}><XCircle size={18} />Reject</button>
+        <button className="secondary-action" type="button" disabled={!selectedIds.length || !canAct} onClick={() => onBulk("approved")}><Check size={18} />Approve</button>
+        <button className="secondary-action" type="button" disabled={!selectedIds.length || !canAct} onClick={() => onBulk("rejected")}><XCircle size={18} />Reject</button>
       </FilterBar>
       <section className="split-grid">
         <div className="panel table-panel">
@@ -1226,10 +1287,10 @@ function MediaView({
             {selectedMedia.notes.map((note) => <TimelineItem key={note.id} label={note.author} detail={`${note.body} - ${formatDate(note.createdAt)}`} />)}
           </div>
           <div className="action-grid">
-            <ActionButton icon={CheckCircle2} label="Approve" onClick={() => onAction(selectedMedia.id, "approved")} />
-            <ActionButton icon={XCircle} label="Reject" onClick={() => onAction(selectedMedia.id, "rejected")} tone="danger" />
-            <ActionButton icon={AlertTriangle} label="Escalate" onClick={() => onAction(selectedMedia.id, "escalated")} />
-            <ActionButton icon={Image} label="Re-upload" onClick={() => onAction(selectedMedia.id, "request_reupload")} />
+            <ActionButton disabled={!canAct} icon={CheckCircle2} label="Approve" onClick={() => onAction(selectedMedia.id, "approved")} />
+            <ActionButton disabled={!canAct} icon={XCircle} label="Reject" onClick={() => onAction(selectedMedia.id, "rejected")} tone="danger" />
+            <ActionButton disabled={!canAct} icon={AlertTriangle} label="Escalate" onClick={() => onAction(selectedMedia.id, "escalated")} />
+            <ActionButton disabled={!canAct} icon={Image} label="Re-upload" onClick={() => onAction(selectedMedia.id, "request_reupload")} />
           </div>
         </div>
       </section>
@@ -1801,6 +1862,32 @@ function canUseWallet(role: AdminRole) {
   return ["super_admin", "admin", "finance", "support"].includes(role);
 }
 
+function canReviewSessions(role: AdminRole) {
+  return ["super_admin", "admin", "trust_safety_manager", "moderator", "support"].includes(role);
+}
+
+function readSessionExpiry() {
+  const raw = window.localStorage.getItem("delta_admin_session_expires_at");
+  const stored = Number(raw || "0");
+  if (raw) return stored;
+
+  const nextExpiry = Date.now() + sessionDurationMs;
+  window.localStorage.setItem("delta_admin_session_expires_at", String(nextExpiry));
+  return nextExpiry;
+}
+
+function readPendingLoginAudit(): AuditLog | null {
+  const raw = window.localStorage.getItem("delta_admin_login_audit");
+  if (!raw) return null;
+
+  window.localStorage.removeItem("delta_admin_login_audit");
+  try {
+    return JSON.parse(raw) as AuditLog;
+  } catch {
+    return null;
+  }
+}
+
 function filterUsers(users: AdminUser[], filters: Record<string, string>) {
   const needle = filters.query.trim().toLowerCase();
   return [...users]
@@ -1894,6 +1981,15 @@ function formatDuration(seconds: number) {
   const minutes = Math.floor(seconds / 60);
   const remaining = seconds % 60;
   return `${minutes}:${remaining.toString().padStart(2, "0")}`;
+}
+
+function formatSessionTime(milliseconds: number) {
+  if (!milliseconds) return "expired";
+  const totalMinutes = Math.max(1, Math.ceil(milliseconds / 60000));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (!hours) return `${minutes}m left`;
+  return `${hours}h ${minutes.toString().padStart(2, "0")}m left`;
 }
 
 function initials(value: string) {
