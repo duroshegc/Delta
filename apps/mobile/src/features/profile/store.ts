@@ -26,10 +26,13 @@ interface ProfileState {
   profile: Profile | null;
   loading: boolean;
   saving: boolean;
+  uploadingPhoto: boolean;
   draft: ProfileDraft;
   load: () => Promise<void>;
   setDraft: (patch: ProfileDraft) => void;
   save: () => Promise<void>;
+  uploadPhoto: (uri: string) => Promise<void>;
+  removePhoto: (photoId: string) => Promise<void>;
   clear: () => void;
 }
 
@@ -37,6 +40,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   profile: null,
   loading: false,
   saving: false,
+  uploadingPhoto: false,
   draft: {},
 
   load: async () => {
@@ -65,5 +69,29 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     }
   },
 
-  clear: () => set({ profile: null, draft: {}, loading: false, saving: false }),
+  uploadPhoto: async (uri: string) => {
+    const current = get().profile;
+    const nextPosition = (current?.photos.length ?? 0);
+    set({ uploadingPhoto: true });
+    try {
+      const photo = await profileApi.uploadPhoto(uri, nextPosition);
+      const photos = [...(current?.photos ?? []), photo].sort((a, b) => a.position - b.position);
+      const next = current ? { ...current, photos } : current;
+      set({ profile: next });
+      useAuthStore.getState().setProfileComplete(isComplete(next));
+    } finally {
+      set({ uploadingPhoto: false });
+    }
+  },
+
+  removePhoto: async (photoId: string) => {
+    await profileApi.removePhoto(photoId);
+    const current = get().profile;
+    if (!current) return;
+    const next = { ...current, photos: current.photos.filter((p) => p.id !== photoId) };
+    set({ profile: next });
+    useAuthStore.getState().setProfileComplete(isComplete(next));
+  },
+
+  clear: () => set({ profile: null, draft: {}, loading: false, saving: false, uploadingPhoto: false }),
 }));
