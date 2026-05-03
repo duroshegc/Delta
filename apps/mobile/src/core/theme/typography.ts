@@ -1,120 +1,75 @@
 /**
- * Delta App Typography System
- * Font sizes, weights, and text styles
+ * Delta Design System — typography tokens.
+ * Source: delta-design-system/project/colors_and_type.css
+ *
+ * Each style sets a concrete fontFamily (loaded via @expo-google-fonts/*)
+ * because RN/Expo can't synthesize weights from a single family the way the
+ * web does.
  */
+import { TextStyle } from 'react-native';
+
+export const FontFamilies = {
+  display: 'PlusJakartaSans_700Bold',
+  displayBold: 'PlusJakartaSans_800ExtraBold',
+  displaySemi: 'PlusJakartaSans_600SemiBold',
+  body: 'DMSans_400Regular',
+  bodyMedium: 'DMSans_500Medium',
+  bodySemi: 'DMSans_600SemiBold',
+} as const;
 
 export const FontSizes = {
-  xs: 10,
-  sm: 12,
-  base: 14,
-  md: 16,
-  lg: 18,
-  xl: 20,
-  '2xl': 24,
-  '3xl': 28,
-  '4xl': 32,
+  display: 32,
+  h1: 24,
+  h2: 20,
+  h3: 17,
+  body: 15,
+  label: 13,
+  caption: 11,
 } as const;
 
 export const FontWeights = {
-  regular: '400' as const,
-  medium: '500' as const,
-  semibold: '600' as const,
-  bold: '700' as const,
-};
+  regular: '400',
+  medium: '500',
+  semibold: '600',
+  bold: '700',
+  extrabold: '800',
+} as const satisfies Record<string, TextStyle['fontWeight']>;
 
 export const LineHeights = {
-  tight: 1.2,
-  normal: 1.5,
-  relaxed: 1.75,
-};
+  tight: 1.15,
+  snug: 1.25,
+  normal: 1.3,
+  relaxed: 1.55,
+} as const;
+
+const make = (
+  fontFamily: string,
+  size: number,
+  lh: number,
+  letterSpacing = 0,
+): TextStyle => ({
+  fontFamily,
+  fontSize: size,
+  lineHeight: Math.round(size * lh),
+  letterSpacing,
+});
 
 export const Typography = {
-  // Display styles
-  displayLarge: {
-    fontSize: FontSizes['4xl'],
-    fontWeight: FontWeights.bold,
-    lineHeight: FontSizes['4xl'] * LineHeights.tight,
-  },
-  displayMedium: {
-    fontSize: FontSizes['3xl'],
-    fontWeight: FontWeights.bold,
-    lineHeight: FontSizes['3xl'] * LineHeights.tight,
-  },
-  displaySmall: {
-    fontSize: FontSizes['2xl'],
-    fontWeight: FontWeights.bold,
-    lineHeight: FontSizes['2xl'] * LineHeights.tight,
-  },
+  display: make(FontFamilies.displayBold, FontSizes.display, LineHeights.tight, -0.64),
+  h1: make(FontFamilies.display, FontSizes.h1, LineHeights.snug, -0.24),
+  h2: make(FontFamilies.displaySemi, FontSizes.h2, LineHeights.normal, -0.1),
+  h3: make(FontFamilies.bodySemi, FontSizes.h3, 1.35),
+  body: make(FontFamilies.body, FontSizes.body, LineHeights.relaxed),
+  bodyMedium: make(FontFamilies.bodyMedium, FontSizes.body, LineHeights.relaxed),
+  label: make(FontFamilies.bodyMedium, FontSizes.label, LineHeights.normal, 0.065),
+  caption: make(FontFamilies.body, FontSizes.caption, 1.4, 0.11),
 
-  // Headline styles
-  headlineLarge: {
-    fontSize: FontSizes.xl,
-    fontWeight: FontWeights.semibold,
-    lineHeight: FontSizes.xl * LineHeights.normal,
-  },
-  headlineMedium: {
-    fontSize: FontSizes.lg,
-    fontWeight: FontWeights.semibold,
-    lineHeight: FontSizes.lg * LineHeights.normal,
-  },
-  headlineSmall: {
-    fontSize: FontSizes.md,
-    fontWeight: FontWeights.semibold,
-    lineHeight: FontSizes.md * LineHeights.normal,
-  },
-
-  // Title styles
-  titleLarge: {
-    fontSize: FontSizes.md,
-    fontWeight: FontWeights.semibold,
-    lineHeight: FontSizes.md * LineHeights.normal,
-  },
-  titleMedium: {
-    fontSize: FontSizes.base,
-    fontWeight: FontWeights.medium,
-    lineHeight: FontSizes.base * LineHeights.normal,
-  },
-  titleSmall: {
-    fontSize: FontSizes.sm,
-    fontWeight: FontWeights.medium,
-    lineHeight: FontSizes.sm * LineHeights.normal,
-  },
-
-  // Body styles
-  bodyLarge: {
-    fontSize: FontSizes.md,
-    fontWeight: FontWeights.regular,
-    lineHeight: FontSizes.md * LineHeights.relaxed,
-  },
-  bodyMedium: {
-    fontSize: FontSizes.base,
-    fontWeight: FontWeights.regular,
-    lineHeight: FontSizes.base * LineHeights.relaxed,
-  },
-  bodySmall: {
-    fontSize: FontSizes.sm,
-    fontWeight: FontWeights.regular,
-    lineHeight: FontSizes.sm * LineHeights.relaxed,
-  },
-
-  // Label styles
-  labelLarge: {
-    fontSize: FontSizes.base,
-    fontWeight: FontWeights.medium,
-    lineHeight: FontSizes.base * LineHeights.normal,
-  },
-  labelMedium: {
-    fontSize: FontSizes.sm,
-    fontWeight: FontWeights.medium,
-    lineHeight: FontSizes.sm * LineHeights.normal,
-  },
-  labelSmall: {
-    fontSize: FontSizes.xs,
-    fontWeight: FontWeights.medium,
-    lineHeight: FontSizes.xs * LineHeights.normal,
-  },
+  // Aliases retained so older screens keep compiling.
+  displayLarge: make(FontFamilies.displayBold, FontSizes.display, LineHeights.tight, -0.64),
+  headlineLarge: make(FontFamilies.display, FontSizes.h1, LineHeights.snug, -0.24),
+  headlineMedium: make(FontFamilies.displaySemi, FontSizes.h2, LineHeights.normal, -0.1),
+  titleMedium: make(FontFamilies.bodySemi, FontSizes.h3, 1.35),
+  labelSmall: make(FontFamilies.body, FontSizes.caption, 1.4, 0.11),
 } as const;
 
 export type TypographyKey = keyof typeof Typography;
-
-// Made with Bob

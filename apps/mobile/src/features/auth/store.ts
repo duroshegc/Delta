@@ -3,7 +3,7 @@ import { secureStorage } from '../../core/storage/secureStorage';
 import { setUnauthorizedHandler } from '../../core/api/client';
 import { authApi, AuthIdentifier, AuthUser } from './api';
 
-type Status = 'unknown' | 'unauthenticated' | 'authenticated';
+type Status = 'unknown' | 'unauthenticated' | 'onboarding' | 'authenticated';
 
 interface AuthState {
   status: Status;
@@ -13,8 +13,12 @@ interface AuthState {
   bootstrap: () => Promise<void>;
   requestOtp: (identifier: AuthIdentifier) => Promise<void>;
   verifyOtp: (code: string) => Promise<void>;
+  setProfileComplete: (complete: boolean) => void;
   logout: () => Promise<void>;
 }
+
+const statusFor = (user: AuthUser): Status =>
+  user.profileComplete ? 'authenticated' : 'onboarding';
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   status: 'unknown',
@@ -30,7 +34,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     try {
       const user = await authApi.me();
-      set({ status: 'authenticated', user });
+      set({ status: statusFor(user), user });
     } catch {
       await secureStorage.clear();
       set({ status: 'unauthenticated', user: null });
@@ -48,11 +52,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const result = await authApi.verifyOtp(challengeId, code);
     await secureStorage.setTokens(result.accessToken, result.refreshToken);
     set({
-      status: 'authenticated',
+      status: statusFor(result.user),
       user: result.user,
       pendingChallengeId: null,
       pendingIdentifier: null,
     });
+  },
+
+  setProfileComplete: (complete) => {
+    const user = get().user;
+    if (!user) return;
+    const next = { ...user, profileComplete: complete };
+    set({ user: next, status: statusFor(next) });
   },
 
   logout: async () => {

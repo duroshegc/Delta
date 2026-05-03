@@ -1,86 +1,64 @@
-import React from 'react';
-import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+import 'react-native-gesture-handler';
+import React, { useCallback, useEffect } from 'react';
+import { View } from 'react-native';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { StatusBar } from 'expo-status-bar';
-import { AppColors, Typography, Spacing } from './src/core/theme';
+import * as SplashScreen from 'expo-splash-screen';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import {
+  useFonts as usePlusJakartaSans,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
+} from '@expo-google-fonts/plus-jakarta-sans';
+import {
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_600SemiBold,
+} from '@expo-google-fonts/dm-sans';
+import { RootNavigator } from './src/navigation/RootNavigator';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <StatusBar style="light" />
-      
-      {/* Delta Logo Placeholder */}
-      <View style={styles.logoContainer}>
-        <View style={styles.logo}>
-          <Text style={styles.logoIcon}>❤️</Text>
-        </View>
-      </View>
-
-      {/* App Title */}
-      <Text style={styles.title}>Delta</Text>
-      
-      {/* Subtitle */}
-      <Text style={styles.subtitle}>Dating & Live Discovery</Text>
-
-      {/* Loading Indicator */}
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={AppColors.primary} />
-      </View>
-
-      {/* Version Info */}
-      <Text style={styles.version}>v1.0.0</Text>
-    </View>
-  );
+// LiveKit ships native modules absent from Expo Go; importing it there would
+// crash the bundle and surface as "Invariant Violation: app entry not found."
+// Load it only in development builds / standalone apps.
+if (Constants.executionEnvironment !== ExecutionEnvironment.StoreClient) {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('@livekit/react-native').registerGlobals();
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: AppColors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.xl,
-  },
-  logoContainer: {
-    marginBottom: Spacing['2xl'],
-  },
-  logo: {
-    width: 120,
-    height: 120,
-    borderRadius: 30,
-    backgroundColor: AppColors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: AppColors.black,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  logoIcon: {
-    fontSize: 60,
-  },
-  title: {
-    ...Typography.displayLarge,
-    color: AppColors.textPrimary,
-    marginBottom: Spacing.sm,
-  },
-  subtitle: {
-    ...Typography.bodyMedium,
-    color: AppColors.secondary,
-    marginBottom: Spacing['3xl'],
-  },
-  loadingContainer: {
-    marginTop: Spacing.xl,
-  },
-  version: {
-    ...Typography.labelSmall,
-    color: AppColors.textSecondary,
-    position: 'absolute',
-    bottom: Spacing.xl,
-  },
-});
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-// Made with Bob
+export default function App() {
+  const [fontsLoaded, fontError] = usePlusJakartaSans({
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
+  });
+
+  useEffect(() => {
+    if (fontError) console.warn('Font load error:', fontError);
+  }, [fontError]);
+
+  const onLayoutReady = useCallback(async () => {
+    if (fontsLoaded || fontError) {
+      await SplashScreen.hideAsync().catch(() => undefined);
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) return null;
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutReady}>
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <View style={{ flex: 1 }}>
+          <RootNavigator />
+        </View>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}

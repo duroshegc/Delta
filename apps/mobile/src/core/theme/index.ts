@@ -3,9 +3,9 @@
  * Central export for all theme-related constants
  */
 
-import { AppColors } from './colors';
-import { Typography, FontSizes, FontWeights, LineHeights } from './typography';
-import { Spacing, BorderRadius } from './spacing';
+import { AppColors, Gradients } from './colors';
+import { Typography, FontSizes, FontWeights, LineHeights, FontFamilies } from './typography';
+import { Spacing, BorderRadius, ButtonHeights, Durations } from './spacing';
 
 export const Theme = {
   colors: AppColors,
@@ -18,7 +18,19 @@ export const Theme = {
 } as const;
 
 // Re-export individual modules for convenience
-export { AppColors, Typography, FontSizes, FontWeights, LineHeights, Spacing, BorderRadius };
+export {
+  AppColors,
+  Gradients,
+  Typography,
+  FontSizes,
+  FontWeights,
+  LineHeights,
+  FontFamilies,
+  Spacing,
+  BorderRadius,
+  ButtonHeights,
+  Durations,
+};
 
 export type ThemeType = typeof Theme;
 

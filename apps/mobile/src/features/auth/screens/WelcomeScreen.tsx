@@ -27,7 +27,7 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.white,
+    backgroundColor: AppColors.background,
     padding: Spacing.xl,
     justifyContent: 'space-between',
   },

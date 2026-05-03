@@ -6,26 +6,32 @@ import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { AuthStackParamList } from '../../../navigation/types';
 import { useAuthStore } from '../store';
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'SignIn'>;
+type Props = NativeStackScreenProps<AuthStackParamList, 'VerifyOtp'>;
 
-export const SignInScreen: React.FC<Props> = ({ navigation }) => {
-  const [phone, setPhone] = useState('');
+export const VerifyOtpScreen: React.FC<Props> = () => {
+  const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const requestOtp = useAuthStore((s) => s.requestOtp);
+  const verifyOtp = useAuthStore((s) => s.verifyOtp);
+  const identifier = useAuthStore((s) => s.pendingIdentifier);
 
   const onSubmit = async () => {
-    const trimmed = phone.trim();
-    if (!trimmed) return;
+    if (code.length < 4) return;
     setSubmitting(true);
     try {
-      await requestOtp({ phone: trimmed });
-      navigation.navigate('VerifyOtp');
+      await verifyOtp(code);
     } catch (err: any) {
-      Alert.alert('Could not send code', err?.response?.data?.message ?? err.message);
+      Alert.alert('Invalid code', err?.response?.data?.message ?? err.message);
     } finally {
       setSubmitting(false);
     }
   };
+
+  const target =
+    identifier && 'phone' in identifier
+      ? identifier.phone
+      : identifier && 'email' in identifier
+        ? identifier.email
+        : 'your device';
 
   return (
     <KeyboardAvoidingView
@@ -33,20 +39,21 @@ export const SignInScreen: React.FC<Props> = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.body}>
-        <Text style={styles.heading}>Enter your phone number</Text>
-        <Text style={styles.caption}>We'll text you a verification code.</Text>
+        <Text style={styles.heading}>Enter verification code</Text>
+        <Text style={styles.caption}>We sent a code to {target}.</Text>
         <TextInput
           style={styles.input}
-          value={phone}
-          onChangeText={setPhone}
-          placeholder="+1 555 555 5555"
-          placeholderTextColor={AppColors.textSecondary}
-          keyboardType="phone-pad"
-          autoComplete="tel"
+          value={code}
+          onChangeText={setCode}
+          placeholder="123456"
+          placeholderTextColor={AppColors.textMuted}
+          keyboardType="number-pad"
+          autoComplete="one-time-code"
+          maxLength={6}
           autoFocus
         />
       </View>
-      <PrimaryButton title="Send code" onPress={onSubmit} loading={submitting} disabled={!phone.trim()} />
+      <PrimaryButton title="Verify" onPress={onSubmit} loading={submitting} disabled={code.length < 4} />
     </KeyboardAvoidingView>
   );
 };
@@ -57,7 +64,7 @@ const styles = StyleSheet.create({
   heading: { ...Typography.h1, color: AppColors.textPrimary, marginBottom: Spacing.sm },
   caption: { ...Typography.body, color: AppColors.textSecondary, marginBottom: Spacing.xl },
   input: {
-    ...Typography.h3,
+    ...Typography.h2,
     color: AppColors.textPrimary,
     backgroundColor: AppColors.surface,
     borderWidth: 1,
@@ -65,5 +72,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
+    letterSpacing: 6,
+    textAlign: 'center',
   },
 });
