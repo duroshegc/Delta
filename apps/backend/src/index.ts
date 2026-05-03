@@ -20,13 +20,19 @@ import {
 import { moderationRoutes } from "./modules/moderation/routes";
 import { adminRoutes } from "./modules/admin/routes";
 
+function corsOriginConfig(): true | string[] {
+  if (env.APP_ENV === "development") return true;
+  const origins = new Set<string>([env.API_PUBLIC_URL, ...env.CORS_ALLOWED_ORIGINS]);
+  return [...origins];
+}
+
 const app = new Elysia()
   .use(
     cors({
-      origin: env.APP_ENV === "development" ? true : [env.API_PUBLIC_URL],
+      origin: corsOriginConfig(),
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
+      allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
     }),
   )
   .use(

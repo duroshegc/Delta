@@ -1056,6 +1056,18 @@ h2 {
   background: var(--delta-surface-3);
 }
 
+.login-error {
+  padding: 12px 14px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-md);
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--delta-danger);
+}
+
+.login-secondary {
+  width: 100%;
+}
+
 @media (max-width: 1120px) {
   .admin-shell {
     grid-template-columns: 88px minmax(0, 1fr);

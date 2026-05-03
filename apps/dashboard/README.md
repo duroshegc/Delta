@@ -10,11 +10,11 @@ npm install
 npm run dev
 ```
 
-The app runs on `http://localhost:3001` by default and expects the backend API at `http://localhost:3000`.
+The app runs on `http://localhost:3001` by default and expects the backend API at `https://backend-teal-one-10.vercel.app`.
 
 ## Backend integration
 
-The dashboard calls the current backend admin API where endpoints exist:
+The dashboard calls the deployed backend admin API where endpoints exist:
 
 - `GET /admin/analytics`
 - `GET /admin/users`
@@ -22,7 +22,7 @@ The dashboard calls the current backend admin API where endpoints exist:
 - `GET /admin/sessions`
 - `PATCH /admin/users/:id`
 
-Set `NEXT_PUBLIC_USE_MOCKS=false` to require live backend responses. With the default mock mode, the dashboard tries the backend first and falls back to local sample data when the API is not running or the admin token is missing.
+`NEXT_PUBLIC_USE_MOCKS=false` requires live backend responses and is the default for the admin dashboard. Set `NEXT_PUBLIC_USE_MOCKS=true` only for isolated local UI development.
 
 The rest of the completed admin surfaces are ready against typed mock-backed adapters until matching backend endpoints are added:
 
@@ -34,4 +34,4 @@ The rest of the completed admin surfaces are ready against typed mock-backed ada
 
 ## Admin session
 
-Visit `/login`, paste an admin JWT from the backend, and enter an MFA code. The dashboard stores the token in `localStorage` as `delta_admin_token`, sets an 8-hour dashboard session cookie, and sends the token as a bearer token for admin requests.
+Visit `/login` and sign in with a backend admin account. The dashboard stores the returned access token in `localStorage` as `delta_admin_token`, sets an 8-hour dashboard session cookie, and sends the token as a bearer token for admin requests. A manual access-token field remains available for operational handoff and debugging.

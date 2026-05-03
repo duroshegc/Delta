@@ -4,6 +4,19 @@ import { mockAnalytics, mockDashboardData, mockReports, mockSessions, mockUsers 
 type ApiEnvelope<T> = {
   success: boolean;
   data: T;
+  message?: string;
+  error?: string;
+};
+
+type SignInResponse = {
+  user: {
+    id?: string;
+    email: string;
+    role?: string;
+  };
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
 };
 
 type BackendUser = Partial<AdminUser> & {
@@ -28,8 +41,8 @@ type BackendSession = Partial<LiveSession> & {
   createdAt: string;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS !== "false";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://backend-teal-one-10.vercel.app";
+const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === "true";
 
 function getStoredToken() {
   if (typeof window === "undefined") return "";
@@ -48,7 +61,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+    let message = `Request failed: ${response.status}`;
+    try {
+      const errorPayload = (await response.json()) as Partial<ApiEnvelope<unknown>>;
+      message = errorPayload.message || errorPayload.error || message;
+    } catch {
+      // Keep the status-based message when the backend does not return JSON.
+    }
+    throw new Error(message);
   }
 
   const payload = (await response.json()) as ApiEnvelope<T>;
@@ -147,6 +167,11 @@ function normalizeSession(session: BackendSession, index: number): LiveSession {
 }
 
 export const adminApi = {
+  signIn: (body: { email: string; password: string }) =>
+    request<SignInResponse>("/auth/signin", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
   analytics: () => withFallback(async () => mergeAnalytics(await request<Partial<Analytics>>("/admin/analytics")), mockAnalytics),
   users: (status = "") => {
     const query = new URLSearchParams({ limit: "100" });

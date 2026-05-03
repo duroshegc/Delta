@@ -1,5 +1,6 @@
 process.env.APP_ENV ||= "development";
 process.env.API_PUBLIC_URL ||= "http://localhost:3000";
+process.env.CORS_ALLOWED_ORIGINS ||= "";
 process.env.MONGODB_URI ||= "mongodb://localhost:27017";
 process.env.MONGODB_DB_NAME ||= "delta_test";
 process.env.UPSTASH_REDIS_REST_URL ||= "https://example.com";

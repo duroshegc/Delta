@@ -4,7 +4,7 @@
 **Priority**: 4 (After Backend + Mobile + Workers Core)  
 **Dependencies**: Backend Admin API, MongoDB data, Analytics aggregations
 
-**Implementation note**: The dashboard now includes every planned admin surface in the Next.js frontend with typed API adapters and mock fallback data. Existing backend admin endpoints are used where available; remaining surfaces are ready for backend endpoint parity.
+**Implementation note**: The dashboard now includes every planned admin surface in the Next.js frontend with typed API adapters pointed at the deployed backend. Live backend responses are required by default; mock data can still be enabled explicitly for isolated local UI development while remaining backend endpoints reach parity.
 
 ---
 

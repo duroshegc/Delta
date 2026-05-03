@@ -55,7 +55,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { adminApi } from "@/lib/api";
+import { API_URL, adminApi } from "@/lib/api";
 import type {
   AdminAccount,
   AdminDataset,
@@ -125,6 +125,7 @@ export function AdminDashboard() {
   const [activeView, setActiveView] = useState<ViewKey>("overview");
   const [data, setData] = useState<AdminDataset | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [role, setRole] = useState<AdminRole>("super_admin");
   const [toast, setToast] = useState("");
@@ -159,21 +160,28 @@ export function AdminDashboard() {
 
     async function loadDashboard() {
       setLoading(true);
-      const nextData = await adminApi.dashboard();
-      if (!mounted) return;
-      const loginAudit = readPendingLoginAudit();
-      setData(nextData);
-      if (loginAudit) {
-        setData((current) => (current ? { ...current, auditLogs: [loginAudit, ...current.auditLogs] } : current));
+      try {
+        const nextData = await adminApi.dashboard();
+        if (!mounted) return;
+        const loginAudit = readPendingLoginAudit();
+        setData(nextData);
+        if (loginAudit) {
+          setData((current) => (current ? { ...current, auditLogs: [loginAudit, ...current.auditLogs] } : current));
+        }
+        setSelectedUserId((current) => current || nextData.users[0]?.id || "");
+        setSelectedReportId((current) => current || nextData.reports[0]?.id || "");
+        setSelectedSessionId((current) => current || nextData.sessions[0]?.sessionId || "");
+        setSelectedMediaId((current) => current || nextData.media[0]?.id || "");
+        setSelectedWalletId((current) => current || nextData.wallets[0]?.userId || "");
+        setSelectedTrustId((current) => current || nextData.trustScores[0]?.userId || "");
+        setLastUpdated(new Date());
+        setLoadError("");
+      } catch (error) {
+        if (!mounted) return;
+        setLoadError(error instanceof Error ? error.message : "Unable to load dashboard data");
+      } finally {
+        if (mounted) setLoading(false);
       }
-      setSelectedUserId((current) => current || nextData.users[0]?.id || "");
-      setSelectedReportId((current) => current || nextData.reports[0]?.id || "");
-      setSelectedSessionId((current) => current || nextData.sessions[0]?.sessionId || "");
-      setSelectedMediaId((current) => current || nextData.media[0]?.id || "");
-      setSelectedWalletId((current) => current || nextData.wallets[0]?.userId || "");
-      setSelectedTrustId((current) => current || nextData.trustScores[0]?.userId || "");
-      setLastUpdated(new Date());
-      setLoading(false);
     }
 
     loadDashboard();
@@ -595,7 +603,12 @@ export function AdminDashboard() {
         <section className="loading-panel">
           <div className="brand-mark" aria-hidden="true"><span>Δ</span></div>
           <h1>Delta admin</h1>
-          <p>{loading ? "Syncing admin data" : "Preparing console"}</p>
+          <p>{loadError || (loading ? "Syncing admin data" : "Preparing console")}</p>
+          {loadError && (
+            <button className="secondary-action" type="button" onClick={() => window.location.reload()}>
+              Retry
+            </button>
+          )}
         </section>
       </main>
     );
@@ -701,7 +714,7 @@ export function AdminDashboard() {
           <span>{lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Waiting for first sync"}</span>
           <span>{roleLabels[role]}</span>
           <span className={sessionRemainingMs < sessionWarningMs ? "session-warning" : undefined}>Session {formatSessionTime(sessionRemainingMs)}</span>
-          <span>API: {process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}</span>
+          <span>API: {API_URL}</span>
         </section>
 
         {toast && <div className="toast" role="status">{toast}</div>}

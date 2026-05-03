@@ -7,6 +7,18 @@ const envSchema = z.object({
     .default("development"),
   PORT: z.string().default("3000").transform(Number),
   API_PUBLIC_URL: z.string().url(),
+  /** Comma-separated browser origins (e.g. dashboard dev + production URLs). Merged with API_PUBLIC_URL for CORS in non-development. */
+  CORS_ALLOWED_ORIGINS: z
+    .string()
+    .default("")
+    .transform((s) => {
+      if (!s.trim()) return [] as string[];
+      return s
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean);
+    })
+    .pipe(z.array(z.string().url())),
 
   // Database
   MONGODB_URI: z.string().min(1),
