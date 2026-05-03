@@ -50,5 +50,6 @@ coverage/
 
 # Misc
 .turbo/
-
 # Made with Bob
+.vercel
+
