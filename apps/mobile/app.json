@@ -12,10 +12,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.delta.mobile"
-    },
     "android": {
       "package": "com.delta.mobile",
       "adaptiveIcon": {
@@ -29,7 +25,18 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-secure-store"
-    ]
+      "expo-secure-store",
+      "@livekit/react-native-expo-plugin",
+      "@config-plugins/react-native-webrtc"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.delta.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Delta uses your camera for live video matching and profile photos.",
+        "NSMicrophoneUsageDescription": "Delta uses your microphone for live video matching.",
+        "NSPhotoLibraryUsageDescription": "Delta accesses your photos so you can upload profile media."
+      }
+    }
   }
 }

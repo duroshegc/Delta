@@ -3,12 +3,32 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "start": "expo start --tunnel",
+    "start": "expo start",
+    "start:tunnel": "expo start --tunnel",
+    "start:clear": "expo start -c",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web"
   },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "@livekit/react-native-webrtc"
+        ],
+        "listUnknownPackages": false
+      }
+    },
+    "install": {
+      "exclude": [
+        "@types/react"
+      ]
+    }
+  },
   "dependencies": {
+    "@config-plugins/react-native-webrtc": "^14.0.0",
+    "@livekit/react-native": "^2.10.2",
+    "@livekit/react-native-expo-plugin": "^1.0.2",
     "@livekit/react-native-webrtc": "^144.0.0",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/bottom-tabs": "^7.15.11",
@@ -24,7 +44,6 @@
     "expo-notifications": "~0.32.17",
     "expo-secure-store": "~15.0.8",
     "expo-status-bar": "~3.0.9",
-    "livekit-react-native": "^0.8.0",
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-gesture-handler": "~2.28.0",
