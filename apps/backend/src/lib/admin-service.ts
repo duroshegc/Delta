@@ -1,6 +1,17 @@
 import { ObjectId, type Db } from "mongodb";
 import { COLLECTIONS } from "../types/database";
 import type { AuditLog } from "../types/safety";
+import { hashPassword } from "./password";
+import { ConflictError } from "../utils/errors";
+
+export type AdminRole =
+  | "super_admin"
+  | "admin"
+  | "trust_safety_manager"
+  | "moderator"
+  | "support"
+  | "finance"
+  | "analyst";
 
 export class AdminService {
   constructor(private db: Db) {}
@@ -58,6 +69,55 @@ export class AdminService {
       },
     });
     return this.db.collection(COLLECTIONS.USERS).findOne({ _id: input.targetUserId });
+  }
+
+  async createAdminAccount(input: {
+    actorId: ObjectId;
+    email: string;
+    password: string;
+    name?: string;
+    role: AdminRole;
+    reason: string;
+  }) {
+    const email = input.email.toLowerCase();
+    const existing = await this.db.collection(COLLECTIONS.USERS).findOne({ email });
+    if (existing) {
+      throw new ConflictError("Email already registered");
+    }
+
+    const now = new Date();
+    const userId = new ObjectId();
+    const passwordHash = await hashPassword(input.password);
+
+    const user = {
+      _id: userId,
+      email,
+      name: input.name,
+      passwordHash,
+      emailVerified: true,
+      phoneVerified: false,
+      status: "active",
+      role: input.role,
+      accountType: "admin",
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await this.db.collection(COLLECTIONS.USERS).insertOne(user);
+    await this.createAuditLog({
+      actorId: input.actorId,
+      targetUserId: userId,
+      action: "admin.account.create",
+      resourceType: "admin",
+      resourceId: userId.toString(),
+      metadata: {
+        email,
+        role: input.role,
+        reason: input.reason,
+      },
+    });
+
+    return user;
   }
 
   async getAnalytics() {

@@ -40,6 +40,16 @@ bun run build
 
 The server will start at `http://localhost:3000`
 
+### Master admin
+
+Create or reset the first `super_admin` account with:
+
+```bash
+MASTER_ADMIN_EMAIL=owner@example.com MASTER_ADMIN_PASSWORD='StrongPassw0rd!' bun run admin:create-master
+```
+
+Only a signed-in `super_admin` can create additional admin accounts through `POST /admin/admins`.
+
 ## 📚 API Documentation
 
 - **API Root**: `http://localhost:3000/`

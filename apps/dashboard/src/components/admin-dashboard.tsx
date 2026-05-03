@@ -540,26 +540,35 @@ export function AdminDashboard() {
     writeAudit(`admin.account.${action}`, account.email, "admin", reason);
   }
 
-  function createAdminAccount() {
+  async function createAdminAccount() {
+    if (role !== "super_admin") {
+      setToast("Only a super admin can create admin accounts");
+      return;
+    }
+
     const email = window.prompt("Admin email");
     if (!email) return;
     const name = window.prompt("Admin name", email.split("@")[0]) || email;
-    mutateData((current) => ({
-      ...current,
-      adminAccounts: [
-        {
-          id: `admin_${Date.now()}`,
-          name,
-          email,
-          role: "moderator",
-          status: "invited",
-          mfaEnabled: true,
-          lastActiveAt: new Date().toISOString(),
-        },
-        ...current.adminAccounts,
-      ],
-    }));
-    writeAudit("admin.account.create", email, "admin", "New admin invitation");
+    const nextRole = (window.prompt("Role", "admin") || "admin") as AdminRole;
+    if (!roleLabels[nextRole]) {
+      setToast("Unknown admin role");
+      return;
+    }
+    const password = window.prompt("Temporary password");
+    if (!password) return;
+    const reason = window.prompt("Reason for creating this admin", "Admin onboarding");
+    if (!reason) return;
+
+    try {
+      const created = await adminApi.createAdmin({ email, name, role: nextRole, password, reason });
+      mutateData((current) => ({
+        ...current,
+        adminAccounts: [created, ...current.adminAccounts],
+      }));
+      writeAudit("admin.account.create", email, "admin", reason);
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Unable to create admin");
+    }
   }
 
   function updateFeatureFlag(key: string, enabled: boolean) {
@@ -831,7 +840,7 @@ export function AdminDashboard() {
           />
         )}
         {resolvedActiveView === "admins" && (
-          <AdminsView accounts={data.adminAccounts} onAction={handleAdminAction} onCreate={createAdminAccount} />
+          <AdminsView accounts={data.adminAccounts} role={role} onAction={handleAdminAction} onCreate={createAdminAccount} />
         )}
         {resolvedActiveView === "settings" && (
           <SettingsView data={data} onFeatureFlagChange={updateFeatureFlag} />
@@ -1566,11 +1575,11 @@ function AuditView({
   );
 }
 
-function AdminsView({ accounts, onAction, onCreate }: { accounts: AdminAccount[]; onAction: (id: string, action: string) => void; onCreate: () => void }) {
+function AdminsView({ accounts, role, onAction, onCreate }: { accounts: AdminAccount[]; role: AdminRole; onAction: (id: string, action: string) => void; onCreate: () => void }) {
   return (
     <div className="view-stack">
       <FilterBar>
-        <button className="primary-inline" type="button" onClick={onCreate}><UserCog size={18} />Invite admin</button>
+        <button className="primary-inline" type="button" disabled={role !== "super_admin"} onClick={onCreate}><UserCog size={18} />Create admin</button>
       </FilterBar>
       <div className="panel table-panel">
         <PanelHeader title="Admin management" subtitle="Roles, MFA, access status, and recent activity" icon={UserCog} />

@@ -16,7 +16,8 @@
     "test:load": "node tests/load-smoke.mjs",
     "test:media": "node --loader ./tests/ts-loader.mjs --experimental-strip-types --experimental-transform-types tests/media-smoke.mjs",
     "db:init": "bun src/scripts/init-db.ts",
-    "db:seed": "bun src/scripts/seed-db.ts"
+    "db:seed": "bun src/scripts/seed-db.ts",
+    "admin:create-master": "bun src/scripts/create-master-admin.ts"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

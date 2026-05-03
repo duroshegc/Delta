@@ -10,12 +10,14 @@ import {
   adminSessionsQuerySchema,
   adminUserActionSchema,
   adminUsersQuerySchema,
+  createAdminAccountSchema,
 } from "./schemas";
-import { ValidationError } from "../../utils/errors";
+import { AuthorizationError, ValidationError } from "../../utils/errors";
+import { validatePasswordStrength } from "../../lib/password";
 
 export const adminRoutes = new Elysia({ prefix: "/admin" })
   .use(requireAuth)
-  .use(requireRole("admin", "super_admin", "moderator", "support"))
+  .use(requireRole("admin", "super_admin", "trust_safety_manager", "moderator", "support", "finance", "analyst"))
   .get(
     "/users",
     async ({ query }) => {
@@ -106,6 +108,53 @@ export const adminRoutes = new Elysia({ prefix: "/admin" })
       detail: { tags: ["Admin"], summary: "Update user" },
     },
   )
+  .post(
+    "/admins",
+    async (context) => {
+      const { user, body } = context as any;
+      if (user.role !== "super_admin") {
+        throw new AuthorizationError("Only a super admin can create admin accounts");
+      }
+
+      const validated = createAdminAccountSchema.parse(body);
+      const passwordValidation = validatePasswordStrength(validated.password);
+      if (!passwordValidation.isValid) {
+        throw new ValidationError(passwordValidation.error || "Invalid password");
+      }
+
+      const created = await new AdminService(getDatabase()).createAdminAccount({
+        actorId: new ObjectId(user.userId),
+        email: validated.email,
+        password: validated.password,
+        name: validated.name,
+        role: validated.role,
+        reason: validated.reason,
+      });
+
+      return { success: true, data: serializeAdminAccount(created) };
+    },
+    {
+      beforeHandle: userRateLimit(RATE_LIMITS.ADMIN),
+      body: t.Object({
+        email: t.String({ format: "email" }),
+        password: t.String({ minLength: 8, maxLength: 128 }),
+        name: t.Optional(t.String({ minLength: 1, maxLength: 100 })),
+        role: t.Optional(
+          t.Union([
+            t.Literal("super_admin"),
+            t.Literal("admin"),
+            t.Literal("trust_safety_manager"),
+            t.Literal("moderator"),
+            t.Literal("support"),
+            t.Literal("finance"),
+            t.Literal("analyst"),
+          ]),
+        ),
+        reason: t.String({ minLength: 3, maxLength: 500 }),
+      }),
+      detail: { tags: ["Admin"], summary: "Create admin account" },
+    },
+  )
   .get(
     "/analytics",
     async () => {
@@ -123,11 +172,25 @@ function serializeUser(user: any) {
   return {
     id: user._id.toString(),
     email: user.email,
+    name: user.name,
+    role: user.role || "user",
     status: user.status,
     emailVerified: user.emailVerified,
     phoneVerified: user.phoneVerified,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
+  };
+}
+
+function serializeAdminAccount(user: any) {
+  return {
+    id: user._id.toString(),
+    name: user.name || user.email.split("@")[0],
+    email: user.email,
+    role: user.role,
+    status: user.status,
+    mfaEnabled: false,
+    lastActiveAt: user.lastActiveAt || user.updatedAt || user.createdAt,
   };
 }
 

@@ -1,4 +1,4 @@
-import type { AdminDataset, AdminReport, AdminUser, Analytics, LiveSession } from "@/types/admin";
+import type { AdminAccount, AdminDataset, AdminReport, AdminRole, AdminUser, Analytics, LiveSession } from "@/types/admin";
 import { mockAnalytics, mockDashboardData, mockReports, mockSessions, mockUsers } from "./mock-data";
 
 type ApiEnvelope<T> = {
@@ -207,6 +207,11 @@ export const adminApi = {
   updateUser: (id: string, body: { status?: AdminUser["status"]; verificationStatus?: string; reason: string }) =>
     request<AdminUser>(`/admin/users/${id}`, {
       method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+  createAdmin: (body: { email: string; password: string; name?: string; role: AdminRole; reason: string }) =>
+    request<AdminAccount>("/admin/admins", {
+      method: "POST",
       body: JSON.stringify(body),
     }),
 };

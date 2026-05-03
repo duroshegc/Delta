@@ -597,6 +597,11 @@ h2 {
   font-weight: 700;
 }
 
+.primary-inline:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
 .action-button {
   border: 1px solid var(--delta-surface-3);
   background: var(--delta-surface-2);
