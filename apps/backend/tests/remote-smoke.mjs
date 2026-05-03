@@ -40,7 +40,18 @@ async function probe(method, pathTemplate) {
   }
   try {
     const res = await fetch(url, init);
-    return { ok: true, status: res.status };
+    let routeMissing = false;
+    if (res.status === 404) {
+      // Distinguish framework "route not mounted" (RouteNotFoundError) from
+      // a route's own NotFoundError (resource missing — route is fine).
+      try {
+        const body = await res.clone().json();
+        routeMissing = body?.code === "ROUTE_NOT_FOUND" || body?.error === "RouteNotFoundError";
+      } catch {
+        routeMissing = true;
+      }
+    }
+    return { ok: true, status: res.status, routeMissing };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
@@ -78,14 +89,19 @@ async function main() {
     if (!result.ok) {
       return { method: method.toUpperCase(), path: pathTemplate, error: result.error };
     }
-    return { method: method.toUpperCase(), path: pathTemplate, status: result.status };
+    return {
+      method: method.toUpperCase(),
+      path: pathTemplate,
+      status: result.status,
+      routeMissing: result.routeMissing,
+    };
   });
 
   const degraded = rows.filter((r) => r.status === 503);
 
   const fatal = rows.filter((r) => {
     if (r.error != null) return true;
-    if (r.status === 404) return true;
+    if (r.routeMissing) return true;
     if (r.status != null && r.status >= 500 && r.status !== 503) return true;
     if (!allowDegraded && r.status === 503) return true;
     return false;

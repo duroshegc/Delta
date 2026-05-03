@@ -92,21 +92,21 @@ export function errorHandler(app: Elysia) {
       return response;
     }
 
-    // Handle Elysia NOT_FOUND errors
+    // Handle Elysia NOT_FOUND errors (route not mounted — distinct from a route's own NotFoundError)
     if (code === "NOT_FOUND") {
       set.status = 404;
 
       const response: ErrorResponse = {
         success: false,
-        error: "NotFoundError",
-        message: "The requested resource was not found",
-        code: "NOT_FOUND",
+        error: "RouteNotFoundError",
+        message: "The requested route does not exist",
+        code: "ROUTE_NOT_FOUND",
         statusCode: 404,
         timestamp,
         path,
       };
 
-      logger.warn({ path }, "Resource not found");
+      logger.warn({ path }, "Route not found");
 
       return response;
     }
