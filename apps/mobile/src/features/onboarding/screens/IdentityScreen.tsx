@@ -5,6 +5,7 @@ import { AppColors, Spacing, Typography } from '../../../core/theme';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { SelectChip } from '../../../shared/components/SelectChip';
 import { OnboardingStackParamList } from '../../../navigation/types';
+import { getApiErrorMessage } from '../../../core/api/errors';
 import { useProfileStore } from '../../profile/store';
 import { DatingIntent, Gender } from '../../profile/types';
 
@@ -18,10 +19,10 @@ const GENDERS: Array<{ value: Gender; label: string }> = [
 ];
 
 const INTENTS: Array<{ value: DatingIntent; label: string }> = [
-  { value: 'long_term', label: 'Long-term' },
-  { value: 'short_term', label: 'Short-term' },
-  { value: 'friends', label: 'Friends' },
-  { value: 'undecided', label: 'Not sure yet' },
+  { value: 'serious', label: 'Long-term' },
+  { value: 'casual', label: 'Short-term' },
+  { value: 'friendship', label: 'Friends' },
+  { value: 'networking', label: 'Networking' },
 ];
 
 export const IdentityScreen: React.FC<Props> = () => {
@@ -48,7 +49,7 @@ export const IdentityScreen: React.FC<Props> = () => {
     try {
       await save();
     } catch (err: any) {
-      Alert.alert('Could not save profile', err?.response?.data?.message ?? err.message);
+      Alert.alert('Could not save profile', getApiErrorMessage(err, 'Profile save failed'));
     }
   };
 

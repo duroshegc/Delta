@@ -167,11 +167,12 @@
 - [x] LiveKit native packages installed
 - [x] LiveKit import guarded for web and Expo Go
 - [x] Backend LiveKit token request wired
+- [x] Video/audio room connection wired for native dev builds
+- [x] Local/remote video renderers wired
+- [x] Mute, camera toggle, and end-call controls wired
 - [ ] Native dev build validation
-- [ ] Video/audio room connection
 - [ ] Camera/microphone permission flow
-- [ ] Local/remote video renderers
-- [ ] Mute, camera flip, audio-only, and end-call controls
+- [ ] Camera flip and audio-only controls
 
 ### 6.3 Live Session Flow
 - [x] Start live match search

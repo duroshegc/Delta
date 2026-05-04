@@ -1,5 +1,5 @@
 export type Gender = 'male' | 'female' | 'nonbinary' | 'other';
-export type DatingIntent = 'long_term' | 'short_term' | 'friends' | 'undecided';
+export type DatingIntent = 'serious' | 'casual' | 'friendship' | 'networking';
 
 export interface ProfilePhoto {
   id: string;

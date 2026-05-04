@@ -28,7 +28,6 @@ export interface LiveMatchResult {
 export interface LiveKitToken {
   token: string;
   url: string;
-  roomName: string;
   provider: string;
 }
 

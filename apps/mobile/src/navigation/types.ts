@@ -36,6 +36,7 @@ export type LiveMatchStackParamList = {
   LiveEntry: undefined;
   LiveSearching: { interests: string[] };
   LivePartnerPreview: { sessionId: string; roomName: string; interest?: string };
+  LiveRoom: { sessionId: string; roomName: string; token: string; serverUrl: string };
 };
 
 export type AppTabParamList = {

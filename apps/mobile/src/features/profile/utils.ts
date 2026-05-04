@@ -10,10 +10,10 @@ export const ageFromBirthDate = (iso: string | null | undefined): number | null 
 };
 
 export const intentLabels: Record<string, string> = {
-  long_term: 'Long-term',
-  short_term: 'Short-term',
-  friends: 'Friends',
-  undecided: 'Not sure yet',
+  serious: 'Long-term',
+  casual: 'Short-term',
+  friendship: 'Friends',
+  networking: 'Networking',
 };
 
 export const genderLabels: Record<string, string> = {

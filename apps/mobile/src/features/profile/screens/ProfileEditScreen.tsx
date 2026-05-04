@@ -5,6 +5,7 @@ import { AppColors, Spacing, Typography } from '../../../core/theme';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { TextField } from '../../../shared/components/TextField';
 import { SelectChip } from '../../../shared/components/SelectChip';
+import { getApiErrorMessage } from '../../../core/api/errors';
 import { useProfileStore } from '../store';
 import { ProfileStackParamList } from '../../../navigation/types';
 import { DatingIntent, Gender } from '../types';
@@ -14,7 +15,7 @@ import { PhotoGrid } from '../components/PhotoGrid';
 type Props = NativeStackScreenProps<ProfileStackParamList, 'ProfileEdit'>;
 
 const GENDERS: Gender[] = ['female', 'male', 'nonbinary', 'other'];
-const INTENTS: DatingIntent[] = ['long_term', 'short_term', 'friends', 'undecided'];
+const INTENTS: DatingIntent[] = ['serious', 'casual', 'friendship', 'networking'];
 
 const splitInterests = (raw: string): string[] =>
   raw
@@ -51,7 +52,7 @@ export const ProfileEditScreen: React.FC<Props> = ({ navigation }) => {
       await save();
       navigation.goBack();
     } catch (err: any) {
-      Alert.alert('Could not save', err?.response?.data?.message ?? err.message);
+      Alert.alert('Could not save', getApiErrorMessage(err, 'Profile save failed'));
     }
   };
 

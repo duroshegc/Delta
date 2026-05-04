@@ -58,12 +58,20 @@ export const LivePartnerPreviewScreen: React.FC<Props> = ({ navigation, route })
               setJoining(true);
               try {
                 const token = await liveMatchApi.createLiveKitToken(route.params.sessionId);
-                Alert.alert(
-                  'LiveKit token ready',
-                  token.provider === 'development'
-                    ? 'Development room is ready. Native video rendering is available in a dev build.'
-                    : 'Room token created. Native video rendering is available in a dev build.',
-                );
+                if (!token.url || token.url === 'development') {
+                  Alert.alert(
+                    'LiveKit is not ready',
+                    'The backend returned a development LiveKit URL. Deploy the backend LiveKit environment values before joining from mobile.',
+                  );
+                  return;
+                }
+
+                navigation.navigate('LiveRoom', {
+                  sessionId: route.params.sessionId,
+                  roomName: route.params.roomName,
+                  token: token.token,
+                  serverUrl: token.url,
+                });
               } catch (err: any) {
                 Alert.alert('Could not join live room', err?.response?.data?.message ?? err.message);
               } finally {

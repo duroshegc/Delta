@@ -2,6 +2,7 @@ import { apiClient } from '../../core/api/client';
 import { DatingIntent, Gender, Profile, ProfileDraft, ProfilePhoto } from './types';
 
 type BackendGender = 'male' | 'female' | 'non-binary' | 'other';
+type BackendIntent = 'serious' | 'casual' | 'friendship' | 'networking';
 
 interface BackendProfile {
   id?: string;
@@ -13,7 +14,7 @@ interface BackendProfile {
   bio?: string;
   location?: { coordinates?: [number, number] };
   city?: string;
-  intent?: DatingIntent | null;
+  intent?: BackendIntent | null;
   lookingFor?: BackendGender[];
   ageRange?: { min: number; max: number };
   maxDistance?: number;
@@ -56,6 +57,12 @@ const toBackendGender = (gender: Gender | null | undefined): BackendGender | und
 const toMobileGender = (gender: BackendGender | null | undefined): Gender | null => {
   if (!gender) return null;
   return gender === 'non-binary' ? 'nonbinary' : gender;
+};
+
+const toBackendDateOfBirth = (birthDate: string | undefined): string | undefined => {
+  if (!birthDate) return undefined;
+  const date = new Date(`${birthDate}T00:00:00.000Z`);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 };
 
 const normalizePhotos = (
@@ -104,7 +111,7 @@ const normalizeProfile = (profile: BackendProfile | null, media: MediaItem[] = [
 
 const toBackendProfilePatch = (draft: ProfileDraft) => ({
   displayName: draft.displayName,
-  dateOfBirth: draft.birthDate,
+  dateOfBirth: toBackendDateOfBirth(draft.birthDate),
   gender: toBackendGender(draft.gender),
   bio: draft.bio,
   intent: draft.intent,

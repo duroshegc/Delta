@@ -26,6 +26,7 @@ import { TransactionHistoryScreen } from '../features/wallet/screens/Transaction
 import { LiveEntryScreen } from '../features/live_match/screens/LiveEntryScreen';
 import { LiveSearchingScreen } from '../features/live_match/screens/LiveSearchingScreen';
 import { LivePartnerPreviewScreen } from '../features/live_match/screens/LivePartnerPreviewScreen';
+import { LiveRoomScreen } from '../features/live_match/screens/LiveRoomScreen';
 import {
   AuthStackParamList,
   OnboardingStackParamList,
@@ -149,6 +150,7 @@ const LiveNavigator = () => (
       component={LivePartnerPreviewScreen}
       options={headerScreen}
     />
+    <LiveStack.Screen name="LiveRoom" component={LiveRoomScreen} options={stackScreen} />
   </LiveStack.Navigator>
 );
 

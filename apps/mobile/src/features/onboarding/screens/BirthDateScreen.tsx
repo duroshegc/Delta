@@ -11,10 +11,25 @@ type Props = NativeStackScreenProps<OnboardingStackParamList, 'OnboardingBirthDa
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+const formatBirthDateInput = (input: string) => {
+  const digits = input.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
+};
+
 const ageInYears = (iso: string): number | null => {
   if (!ISO_DATE.test(iso)) return null;
-  const dob = new Date(iso);
+  const [year, month, day] = iso.split('-').map(Number);
+  const dob = new Date(Date.UTC(year, month - 1, day));
   if (Number.isNaN(dob.getTime())) return null;
+  if (
+    dob.getUTCFullYear() !== year ||
+    dob.getUTCMonth() !== month - 1 ||
+    dob.getUTCDate() !== day
+  ) {
+    return null;
+  }
   const now = new Date();
   let age = now.getFullYear() - dob.getFullYear();
   const m = now.getMonth() - dob.getMonth();
@@ -29,10 +44,18 @@ export const BirthDateScreen: React.FC<Props> = ({ navigation }) => {
 
   const age = useMemo(() => ageInYears(value), [value]);
   const error =
-    value.length === 10 && (age === null ? 'Use YYYY-MM-DD' : age < 18 ? 'You must be 18+' : null);
+    value.length > 0 && value.length < 10
+      ? 'Use YYYY-MM-DD'
+      : value.length === 10 && age === null
+        ? 'Enter a real date'
+        : age !== null && age < 18
+          ? 'You must be 18+'
+          : age !== null && age > 100
+            ? 'Enter an age under 100'
+            : null;
 
   const onNext = () => {
-    if (!age || age < 18) return;
+    if (age === null || age < 18 || age > 100) return;
     setDraft({ birthDate: value });
     navigation.navigate('OnboardingIdentity');
   };
@@ -44,15 +67,15 @@ export const BirthDateScreen: React.FC<Props> = ({ navigation }) => {
         <Text style={styles.subtitle}>You must be 18 or older to use Delta.</Text>
         <TextField
           value={value}
-          onChangeText={setValue}
+          onChangeText={(text) => setValue(formatBirthDateInput(text))}
           placeholder="YYYY-MM-DD"
-          keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'}
+          keyboardType="number-pad"
           autoFocus
           maxLength={10}
           error={error || undefined}
         />
       </View>
-      <PrimaryButton title="Continue" onPress={onNext} disabled={!age || age < 18} />
+      <PrimaryButton title="Continue" onPress={onNext} disabled={age === null || age < 18 || age > 100} />
     </KeyboardAvoidingView>
   );
 };
