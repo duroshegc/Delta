@@ -4,37 +4,58 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppColors, BorderRadius, Spacing, Typography } from '../../../core/theme';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { MatchesStackParamList } from '../../../navigation/types';
+import { ReportCategory, safetyApi } from '../api';
 
 type Props = NativeStackScreenProps<MatchesStackParamList, 'ReportUser'>;
 
-const REASONS = [
-  'Inappropriate photos',
-  'Harassment or hateful language',
-  'Spam or scam',
-  'Underage user',
-  'Off-platform contact request',
-  'Threats or violence',
-  'Other',
+const REASONS: Array<{ label: string; category: ReportCategory }> = [
+  { label: 'Inappropriate photos', category: 'inappropriate_content' },
+  { label: 'Harassment or hateful language', category: 'harassment' },
+  { label: 'Spam or scam', category: 'scam' },
+  { label: 'Underage user', category: 'underage' },
+  { label: 'Fake profile', category: 'fake_profile' },
+  { label: 'Other', category: 'other' },
 ];
 
-export const ReportUserScreen: React.FC<Props> = ({ navigation }) => {
-  const [reason, setReason] = useState<string | null>(null);
+export const ReportUserScreen: React.FC<Props> = ({ navigation, route }) => {
+  const { userId, matchId } = route.params;
+  const [reason, setReason] = useState<(typeof REASONS)[number] | null>(null);
   const [details, setDetails] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (!reason) return;
-    Alert.alert(
-      'Report submitted',
-      'Our safety team will review within 24 hours. You can also block this user.',
-      [
-        {
-          text: 'Block & exit',
-          style: 'destructive',
-          onPress: () => navigation.popToTop(),
-        },
-        { text: 'Done', onPress: () => navigation.popToTop() },
-      ],
-    );
+    setSubmitting(true);
+    try {
+      await safetyApi.submitReport({
+        reportedUserId: userId,
+        category: reason.category,
+        description: details.trim() || reason.label,
+        conversationId: matchId,
+      });
+      Alert.alert(
+        'Report submitted',
+        'Our safety team will review within 24 hours. You can also block this user.',
+        [
+          {
+            text: 'Block & exit',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                await safetyApi.blockUser(userId, reason.label);
+              } finally {
+                navigation.popToTop();
+              }
+            },
+          },
+          { text: 'Done', onPress: () => navigation.popToTop() },
+        ],
+      );
+    } catch (err: any) {
+      Alert.alert('Could not submit report', err?.response?.data?.message ?? err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -48,16 +69,18 @@ export const ReportUserScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.reasonList}>
         {REASONS.map((r) => (
           <Pressable
-            key={r}
+            key={r.category}
             onPress={() => setReason(r)}
             style={({ pressed }) => [
               styles.reason,
-              reason === r && styles.reasonSelected,
+              reason?.category === r.category && styles.reasonSelected,
               pressed && styles.pressed,
             ]}
           >
-            <Text style={[styles.reasonLabel, reason === r && styles.reasonLabelSelected]}>{r}</Text>
-            {reason === r && <Text style={styles.checkmark}>✓</Text>}
+            <Text style={[styles.reasonLabel, reason?.category === r.category && styles.reasonLabelSelected]}>
+              {r.label}
+            </Text>
+            {reason?.category === r.category && <Text style={styles.checkmark}>✓</Text>}
           </Pressable>
         ))}
       </View>
@@ -73,7 +96,7 @@ export const ReportUserScreen: React.FC<Props> = ({ navigation }) => {
         style={styles.detailsInput}
       />
 
-      <PrimaryButton title="Submit report" onPress={onSubmit} disabled={!reason} />
+      <PrimaryButton title="Submit report" onPress={onSubmit} loading={submitting} disabled={!reason} />
     </ScrollView>
   );
 };

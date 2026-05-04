@@ -6,6 +6,8 @@ import { requireAuth } from "../../middleware/auth";
 import { userRateLimit } from "../../middleware/rate-limit";
 import { SafetyService } from "../../lib/safety-service";
 import { blockUserSchema, submitReportSchema } from "./schemas";
+import { COLLECTIONS } from "../../types/database";
+import { ValidationError } from "../../utils/errors";
 
 export const moderationRoutes = new Elysia()
   .use(requireAuth)
@@ -67,6 +69,84 @@ export const moderationRoutes = new Elysia()
         tags: ["Moderation"],
         summary: "Submit report",
         description: "Report a user and create a moderation case",
+      },
+    },
+  )
+  .get(
+    "/blocks",
+    async (context) => {
+      const { user } = context as any;
+      const db = getDatabase();
+      const blocks = await new SafetyService(db).listBlockedUsers(
+        new ObjectId(user.userId),
+      );
+      const blockedUserIds = blocks.map((block) => block.blockedUserId);
+      const profiles = blockedUserIds.length
+        ? await db
+            .collection(COLLECTIONS.PROFILES)
+            .find({ userId: { $in: blockedUserIds } } as any)
+            .project({ userId: 1, displayName: 1 })
+            .toArray()
+        : [];
+      const namesByUserId = new Map(
+        profiles.map((profile: any) => [
+          profile.userId.toString(),
+          profile.displayName,
+        ]),
+      );
+
+      return {
+        success: true,
+        data: blocks.map((block) => ({
+          ...serializeBlock(block),
+          userId: block.blockedUserId.toString(),
+          displayName:
+            namesByUserId.get(block.blockedUserId.toString()) ||
+            "Delta member",
+          blockedAt: block.createdAt,
+        })),
+      };
+    },
+    {
+      beforeHandle: userRateLimit(RATE_LIMITS.API),
+      detail: {
+        tags: ["Moderation"],
+        summary: "List blocked users",
+        description: "List users blocked by the authenticated user",
+      },
+    },
+  )
+  .delete(
+    "/blocks/:blockedUserId",
+    async (context) => {
+      const { user, params } = context as any;
+
+      if (!ObjectId.isValid(params.blockedUserId)) {
+        throw new ValidationError("Invalid blocked user ID");
+      }
+
+      const result = await new SafetyService(getDatabase()).unblockUser({
+        blockerUserId: new ObjectId(user.userId),
+        blockedUserId: new ObjectId(params.blockedUserId),
+      });
+
+      return {
+        success: true,
+        message: result.deleted
+          ? "User unblocked successfully"
+          : "User was not blocked",
+        data: result,
+      };
+    },
+    {
+      beforeHandle: userRateLimit(RATE_LIMITS.API),
+      params: t.Object({
+        blockedUserId: t.String(),
+      }),
+      detail: {
+        tags: ["Moderation"],
+        summary: "Unblock user",
+        description: "Remove a user from the authenticated user's block list",
       },
     },
   )

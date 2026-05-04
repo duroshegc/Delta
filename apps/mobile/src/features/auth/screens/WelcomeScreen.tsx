@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppColors, Spacing, Typography } from '../../../core/theme';
+import { AppColors, BorderRadius, Spacing, Typography } from '../../../core/theme';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { AuthStackParamList } from '../../../navigation/types';
 
@@ -12,7 +12,7 @@ export const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.hero}>
         <View style={styles.logo}>
-          <Text style={styles.logoIcon}>❤️</Text>
+          <Image source={require('../../../../assets/icon.png')} style={styles.logoImage} />
         </View>
         <Text style={styles.title}>Delta</Text>
         <Text style={styles.subtitle}>Dating & Live Discovery</Text>
@@ -35,13 +35,15 @@ const styles = StyleSheet.create({
   logo: {
     width: 120,
     height: 120,
-    borderRadius: 30,
-    backgroundColor: AppColors.primary,
+    borderRadius: BorderRadius.xl,
+    backgroundColor: AppColors.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.xl,
+    borderWidth: 1,
+    borderColor: AppColors.surface3,
   },
-  logoIcon: { fontSize: 60 },
+  logoImage: { width: 92, height: 92, borderRadius: BorderRadius.lg },
   title: { ...Typography.displayLarge, color: AppColors.textPrimary, marginBottom: Spacing.sm },
   subtitle: { ...Typography.bodyMedium, color: AppColors.textSecondary },
   actions: { paddingBottom: Spacing.xl },

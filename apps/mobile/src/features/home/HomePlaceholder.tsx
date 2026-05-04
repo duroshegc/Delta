@@ -12,7 +12,7 @@ export const HomePlaceholder: React.FC = () => {
     <View style={styles.container}>
       <Text style={styles.title}>You're in.</Text>
       <Text style={styles.body}>
-        {user?.phone ?? user?.email ?? user?.id ?? 'Authenticated user'}
+        {user?.email ?? user?.id ?? 'Authenticated user'}
       </Text>
       <PrimaryButton title="Sign out" onPress={logout} style={{ marginTop: Spacing.xl }} />
     </View>

@@ -1,18 +1,16 @@
 import { create } from 'zustand';
 import { secureStorage } from '../../core/storage/secureStorage';
 import { setUnauthorizedHandler } from '../../core/api/client';
-import { authApi, AuthIdentifier, AuthUser } from './api';
+import { authApi, AuthUser } from './api';
 
 type Status = 'unknown' | 'unauthenticated' | 'onboarding' | 'authenticated';
 
 interface AuthState {
   status: Status;
   user: AuthUser | null;
-  pendingChallengeId: string | null;
-  pendingIdentifier: AuthIdentifier | null;
   bootstrap: () => Promise<void>;
-  requestOtp: (identifier: AuthIdentifier) => Promise<void>;
-  verifyOtp: (code: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, name?: string) => Promise<void>;
   setProfileComplete: (complete: boolean) => void;
   logout: () => Promise<void>;
 }
@@ -23,8 +21,6 @@ const statusFor = (user: AuthUser): Status =>
 export const useAuthStore = create<AuthState>((set, get) => ({
   status: 'unknown',
   user: null,
-  pendingChallengeId: null,
-  pendingIdentifier: null,
 
   bootstrap: async () => {
     const token = await secureStorage.getAccessToken();
@@ -41,21 +37,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  requestOtp: async (identifier) => {
-    const { challengeId } = await authApi.requestOtp(identifier);
-    set({ pendingChallengeId: challengeId, pendingIdentifier: identifier });
+  signIn: async (email, password) => {
+    const result = await authApi.signIn(email, password);
+    await secureStorage.setTokens(result.accessToken, result.refreshToken);
+    const user = await authApi.me().catch(() => result.user);
+    set({
+      status: statusFor(user),
+      user,
+    });
   },
 
-  verifyOtp: async (code) => {
-    const challengeId = get().pendingChallengeId;
-    if (!challengeId) throw new Error('No pending OTP challenge');
-    const result = await authApi.verifyOtp(challengeId, code);
+  signUp: async (email, password, name) => {
+    const result = await authApi.signUp(email, password, name);
     await secureStorage.setTokens(result.accessToken, result.refreshToken);
+    const user = await authApi.me().catch(() => result.user);
     set({
-      status: statusFor(result.user),
-      user: result.user,
-      pendingChallengeId: null,
-      pendingIdentifier: null,
+      status: statusFor(user),
+      user,
     });
   },
 

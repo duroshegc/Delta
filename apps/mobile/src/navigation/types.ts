@@ -34,8 +34,8 @@ export type WalletStackParamList = {
 
 export type LiveMatchStackParamList = {
   LiveEntry: undefined;
-  LiveSearching: undefined;
-  LivePartnerPreview: { partnerId: string };
+  LiveSearching: { interests: string[] };
+  LivePartnerPreview: { sessionId: string; roomName: string; interest?: string };
 };
 
 export type AppTabParamList = {

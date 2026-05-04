@@ -4,17 +4,18 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppColors, BorderRadius, Spacing, Typography } from '../../../core/theme';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { LiveMatchStackParamList } from '../../../navigation/types';
+import { liveMatchApi } from '../api';
 
 type Props = NativeStackScreenProps<LiveMatchStackParamList, 'LivePartnerPreview'>;
 
 const COUNTDOWN_SECONDS = 10;
 
-export const LivePartnerPreviewScreen: React.FC<Props> = ({ navigation }) => {
+export const LivePartnerPreviewScreen: React.FC<Props> = ({ navigation, route }) => {
   const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_SECONDS);
+  const [joining, setJoining] = useState(false);
 
   useEffect(() => {
     if (secondsLeft <= 0) {
-      Alert.alert('Demo only', 'Live video starts after wiring LiveKit in a dev build.');
       navigation.popToTop();
       return;
     }
@@ -28,12 +29,12 @@ export const LivePartnerPreviewScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.preview}>
           <Text style={styles.previewInitial}>S</Text>
         </View>
-        <Text style={styles.name}>Sophia, 26</Text>
-        <Text style={styles.meta}>Architect · San Francisco</Text>
+        <Text style={styles.name}>Live match ready</Text>
+        <Text style={styles.meta}>{route.params.roomName}</Text>
         <View style={styles.tagRow}>
-          <Tag label="Hiking" />
-          <Tag label="Design" />
-          <Tag label="Coffee" />
+          <Tag label={route.params.interest ?? 'Shared interests'} />
+          <Tag label="Video" />
+          <Tag label="Safety tools on" />
         </View>
       </View>
 
@@ -52,12 +53,23 @@ export const LivePartnerPreviewScreen: React.FC<Props> = ({ navigation }) => {
         <View style={{ flex: 1 }}>
           <PrimaryButton
             title="Join now"
-            onPress={() =>
-              Alert.alert(
-                'Live video',
-                'Hooks into LiveKit room join in the dev build. UI flow is ready.',
-              )
-            }
+            loading={joining}
+            onPress={async () => {
+              setJoining(true);
+              try {
+                const token = await liveMatchApi.createLiveKitToken(route.params.sessionId);
+                Alert.alert(
+                  'LiveKit token ready',
+                  token.provider === 'development'
+                    ? 'Development room is ready. Native video rendering is available in a dev build.'
+                    : 'Room token created. Native video rendering is available in a dev build.',
+                );
+              } catch (err: any) {
+                Alert.alert('Could not join live room', err?.response?.data?.message ?? err.message);
+              } finally {
+                setJoining(false);
+              }
+            }}
           />
         </View>
       </View>

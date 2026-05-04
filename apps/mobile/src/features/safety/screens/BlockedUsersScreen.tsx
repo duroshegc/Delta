@@ -1,29 +1,50 @@
-import React, { useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { AppColors, Spacing, Typography } from '../../../core/theme';
-
-interface Blocked {
-  userId: string;
-  displayName: string;
-  blockedAt: string;
-}
-
-const SEED: Blocked[] = [
-  { userId: 'b-1', displayName: 'Alex', blockedAt: '2 weeks ago' },
-  { userId: 'b-2', displayName: 'Jamie', blockedAt: 'last month' },
-];
+import { BlockedUser, safetyApi } from '../api';
 
 export const BlockedUsersScreen: React.FC = () => {
-  const [blocked, setBlocked] = useState<Blocked[]>(SEED);
+  const [blocked, setBlocked] = useState<BlockedUser[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      setBlocked(await safetyApi.listBlockedUsers());
+    } catch (err: any) {
+      Alert.alert('Could not load blocked users', err?.response?.data?.message ?? err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
 
   const onUnblock = (userId: string, name: string) =>
     Alert.alert(`Unblock ${name}?`, "They'll be able to see your profile and message you.", [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Unblock',
-        onPress: () => setBlocked((prev) => prev.filter((b) => b.userId !== userId)),
+        onPress: async () => {
+          try {
+            await safetyApi.unblockUser(userId);
+            setBlocked((prev) => prev.filter((b) => b.userId !== userId));
+          } catch (err: any) {
+            Alert.alert('Could not unblock user', err?.response?.data?.message ?? err.message);
+          }
+        },
       },
     ]);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator color={AppColors.primary} />
+      </View>
+    );
+  }
 
   if (blocked.length === 0) {
     return (
@@ -44,7 +65,7 @@ export const BlockedUsersScreen: React.FC = () => {
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
             <Text style={styles.name}>{item.displayName}</Text>
-            <Text style={styles.meta}>Blocked {item.blockedAt}</Text>
+            <Text style={styles.meta}>Blocked {formatBlockedAt(item.blockedAt)}</Text>
           </View>
           <Pressable
             onPress={() => onUnblock(item.userId, item.displayName)}
@@ -84,3 +105,9 @@ const styles = StyleSheet.create({
   separator: { height: StyleSheet.hairlineWidth, backgroundColor: AppColors.surface3, marginLeft: Spacing.xl },
   pressed: { opacity: 0.85 },
 });
+
+const formatBlockedAt = (value: string) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+};

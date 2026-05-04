@@ -114,6 +114,25 @@ export class SafetyService {
     return (await this.blocks.findOne({ _id: result.insertedId }))!;
   }
 
+  async listBlockedUsers(blockerUserId: ObjectId): Promise<Block[]> {
+    return this.blocks
+      .find({ blockerUserId })
+      .sort({ createdAt: -1, _id: -1 })
+      .toArray();
+  }
+
+  async unblockUser(input: {
+    blockerUserId: ObjectId;
+    blockedUserId: ObjectId;
+  }): Promise<{ deleted: boolean }> {
+    const result = await this.blocks.deleteOne({
+      blockerUserId: input.blockerUserId,
+      blockedUserId: input.blockedUserId,
+    });
+
+    return { deleted: result.deletedCount > 0 };
+  }
+
   async assertUsersCanInteract(userA: ObjectId, userB: ObjectId): Promise<void> {
     const blocked = await this.blocks.findOne({
       $or: [

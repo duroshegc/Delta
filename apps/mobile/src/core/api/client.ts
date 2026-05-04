@@ -3,6 +3,11 @@ import { Env } from '../config/env';
 import { secureStorage } from '../storage/secureStorage';
 
 type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+type ApiEnvelope<T> = {
+  success?: boolean;
+  message?: string;
+  data?: T;
+};
 
 let onUnauthorized: (() => void) | null = null;
 export const setUnauthorizedHandler = (fn: () => void) => {
@@ -29,13 +34,14 @@ const refreshTokens = async (): Promise<string | null> => {
   const refreshToken = await secureStorage.getRefreshToken();
   if (!refreshToken) return null;
   try {
-    const { data } = await axios.post(
+    const { data } = await axios.post<ApiEnvelope<{ accessToken: string; refreshToken: string }>>(
       `${Env.apiBaseUrl}/auth/refresh`,
       { refreshToken },
       { timeout: Env.apiTimeout },
     );
-    await secureStorage.setTokens(data.accessToken, data.refreshToken);
-    return data.accessToken;
+    const tokens = data.data ?? data as { accessToken: string; refreshToken: string };
+    await secureStorage.setTokens(tokens.accessToken, tokens.refreshToken);
+    return tokens.accessToken;
   } catch {
     await secureStorage.clear();
     return null;
@@ -43,7 +49,13 @@ const refreshTokens = async (): Promise<string | null> => {
 };
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const body = response.data as ApiEnvelope<unknown>;
+    if (body && typeof body === 'object' && 'success' in body && 'data' in body) {
+      response.data = body.data;
+    }
+    return response;
+  },
   async (error: AxiosError) => {
     const original = error.config as RetriableConfig | undefined;
     if (error.response?.status === 401 && original && !original._retry) {

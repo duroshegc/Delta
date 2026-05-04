@@ -27,8 +27,11 @@ export const useMatchesStore = create<MatchesState>((set, get) => ({
       if (USE_FIXTURES) {
         set({ matches: fixtureMatches, headersByMatch: fixtureHeaders });
       } else {
-        const matches = await matchesApi.list();
-        set({ matches });
+        const [matches, headersByMatch] = await Promise.all([
+          matchesApi.list(),
+          matchesApi.listHeaders(),
+        ]);
+        set({ matches, headersByMatch });
       }
     } catch (err: any) {
       set({ error: err?.response?.data?.message ?? err.message ?? 'Failed to load matches' });

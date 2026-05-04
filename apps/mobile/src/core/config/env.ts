@@ -25,27 +25,34 @@ interface EnvConfig {
   websocketUrl: string;
 }
 
+const API_BASE_URL =
+  process.env.EXPO_PUBLIC_API_BASE_URL || 'https://backend-teal-one-10.vercel.app';
+
+const WEBSOCKET_URL =
+  process.env.EXPO_PUBLIC_WEBSOCKET_URL ||
+  API_BASE_URL.replace(/^http/, 'ws').replace(/\/$/, '') + '/live-match/events';
+
 const configs: Record<Environment, EnvConfig> = {
   development: {
-    apiBaseUrl: 'http://localhost:3000',
+    apiBaseUrl: API_BASE_URL,
     imagekitPublicKey: process.env.EXPO_PUBLIC_IMAGEKIT_PUBLIC_KEY || '',
     imagekitUrlEndpoint: process.env.EXPO_PUBLIC_IMAGEKIT_URL_ENDPOINT || '',
     livekitUrl: process.env.EXPO_PUBLIC_LIVEKIT_URL || '',
-    websocketUrl: 'ws://localhost:3000/live-match/events',
+    websocketUrl: WEBSOCKET_URL,
   },
   staging: {
-    apiBaseUrl: 'https://api-staging.delta.app',
+    apiBaseUrl: API_BASE_URL,
     imagekitPublicKey: process.env.EXPO_PUBLIC_IMAGEKIT_PUBLIC_KEY || '',
     imagekitUrlEndpoint: process.env.EXPO_PUBLIC_IMAGEKIT_URL_ENDPOINT || '',
     livekitUrl: process.env.EXPO_PUBLIC_LIVEKIT_URL || '',
-    websocketUrl: 'wss://api-staging.delta.app/live-match/events',
+    websocketUrl: WEBSOCKET_URL,
   },
   production: {
-    apiBaseUrl: 'https://api.delta.app',
+    apiBaseUrl: API_BASE_URL,
     imagekitPublicKey: process.env.EXPO_PUBLIC_IMAGEKIT_PUBLIC_KEY || '',
     imagekitUrlEndpoint: process.env.EXPO_PUBLIC_IMAGEKIT_URL_ENDPOINT || '',
     livekitUrl: process.env.EXPO_PUBLIC_LIVEKIT_URL || '',
-    websocketUrl: 'wss://api.delta.app/live-match/events',
+    websocketUrl: WEBSOCKET_URL,
   },
 };
 

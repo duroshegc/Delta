@@ -1,134 +1,153 @@
 # Mobile App Development Plan
 
-**Status**: 🟡 Waiting for Backend  
-**Priority**: 2 (After Backend Foundation)  
-**Dependencies**: Backend API (auth, profiles, media, wallet endpoints)
+**Status**: 🟢 API integration in progress; core backend is reachable  
+**Priority**: 1  
+**Stack**: Expo + React Native + TypeScript  
+**Backend**: `https://backend-teal-one-10.vercel.app`
 
 ---
 
-## Overview
+## Current Snapshot
 
-Flutter mobile app for iOS and Android. Provides user-facing features including authentication, profile management, discovery feed, matching, chat, wallet/token purchases, live video matching, and safety controls.
-
----
+- [x] Mobile app runs in Expo/React Native
+- [x] Light theme uses Delta design-system colors, fonts, and app logo asset
+- [x] Production API health is green (`api`, `database`, `redis`)
+- [x] Mobile TypeScript check passes
+- [x] Backend TypeScript check passes
+- [x] In-app browser reaches the Delta sign-in screen
 
 ## Phase 1: Project Setup & Architecture
 
-### 1.1 Flutter Project Initialization
-- [ ] Create Flutter project with iOS and Android support
-- [ ] Configure app bundle IDs and signing
-- [ ] Set up development, staging, and production flavors
-- [ ] Configure app icons and splash screens
-- [ ] Set up deep linking (delta://)
+### 1.1 Expo Project Initialization
+- [x] Create Expo project with iOS, Android, and web support
+- [x] Configure app bundle IDs
+- [x] Configure app icons and splash screens
+- [x] Configure light-mode app shell
+- [ ] Set up native development/staging/production build profiles
+- [ ] Set up deep linking (`delta://`)
 
 ### 1.2 Architecture & State Management
-- [ ] Choose state management (Riverpod/Bloc/Provider)
-- [ ] Set up feature-based folder structure
-- [ ] Create base API client with interceptors
-- [ ] Implement token refresh logic
-- [ ] Error handling and retry mechanisms
+- [x] Set up feature-based folder structure
+- [x] Set up Zustand stores
+- [x] Create base API client with interceptors
+- [x] Implement token refresh logic
+- [x] Add backend response unwrapping
+- [x] Add web-safe auth token storage fallback
+- [ ] Add centralized retry policy for transient API failures
 
 ### 1.3 Core Dependencies
-- [ ] HTTP client (dio/http)
-- [ ] State management package
-- [ ] Secure storage (flutter_secure_storage)
-- [ ] Image picker and camera
-- [ ] Video player
-- [ ] Push notifications (FCM)
-- [ ] Deep linking (uni_links/go_router)
-- [ ] Location services (geolocator)
+- [x] Axios HTTP client
+- [x] Zustand state management
+- [x] Expo Secure Store
+- [x] Image picker and media library
+- [x] Camera and microphone packages
+- [x] Expo Notifications package
+- [x] Expo Location package
+- [x] LiveKit packages guarded for native builds
+- [x] React Native Web runtime
 
 ---
 
 ## Phase 2: Authentication Module
 
 ### 2.1 Auth Screens
-- [ ] Welcome/onboarding screen
-- [ ] Phone/email input screen
-- [ ] OTP verification screen
-- [ ] Session management
-- [ ] Auto-login with stored tokens
-- [ ] Logout functionality
+- [x] Welcome screen
+- [x] Email/password sign-in screen
+- [x] Account creation mode
+- [x] Session bootstrap
+- [x] Auto-login with stored tokens
+- [x] Logout functionality
+- [ ] Email verification UX
+- [ ] Password reset UX
 
 ### 2.2 Auth State
-- [ ] Auth state provider
-- [ ] Token storage (access + refresh)
+- [x] Auth state provider/store
+- [x] Token storage (access + refresh)
+- [x] Session expiry handling through refresh interceptor
 - [ ] Device registration
-- [ ] Session expiry handling
-- [ ] Biometric authentication (optional)
+- [ ] Biometric authentication
 
 ---
 
 ## Phase 3: Onboarding & Profile Setup
 
 ### 3.1 Onboarding Flow
-- [ ] Profile photo upload (ImageKit integration)
-- [ ] Display name input
-- [ ] Birth date and age verification
-- [ ] Gender and preferences
-- [ ] Dating intent selection
-- [ ] Interests selection (multi-select)
-- [ ] Location permission request
+- [x] Display name input
+- [x] Birth date and age validation
+- [x] Gender selection
+- [x] Dating intent selection
+- [x] Interested-in selection
+- [x] Save onboarding profile to backend
+- [ ] Interest selection during onboarding
+- [ ] Location permission request and backend save
 - [ ] Profile completion progress indicator
 
 ### 3.2 Profile Module
-- [ ] Profile view screen
-- [ ] Profile edit screen
-- [ ] Photo/video upload with ImageKit
-- [ ] Prompts and answers
-- [ ] Preferences (age range, distance, gender)
-- [ ] Verification flow (selfie/video)
-- [ ] Profile preview
+- [x] Profile view screen
+- [x] Profile edit screen
+- [x] Profile API normalization for backend field names
+- [x] Profile photo upload through backend ImageKit auth
+- [x] Photo removal
+- [x] Preferences mapping for age range, distance, and gender
+- [ ] Prompt editor UX
+- [ ] Verification selfie/video flow
+- [ ] Profile preview mode
+- [ ] Video upload UX
 
 ---
 
 ## Phase 4: Discovery & Matching
 
 ### 4.1 Discovery Feed
-- [ ] Swipeable profile cards (Tinder-style)
+- [x] Swipeable profile cards
+- [x] Backend discovery feed integration
+- [x] Like action
+- [x] Pass action
+- [x] Super like action mapped to backend
+- [x] Match notification alert
 - [ ] Profile detail view
-- [ ] Like/pass actions
-- [ ] Super like action (with delt cost)
-- [ ] Rewind action (premium)
-- [ ] Filters (age, distance, interests)
-- [ ] Daily recommendations
+- [ ] Super-like cost confirmation
+- [ ] Rewind action
+- [ ] Discovery filters
+- [ ] Daily recommendations UX
 
 ### 4.2 Matches & Chat
-- [ ] Matches list screen
-- [ ] Match notification
-- [ ] Chat conversation screen
-- [ ] Message input with media
-- [ ] Image/video messages (ImageKit)
-- [ ] Voice notes (optional)
+- [x] Matches/conversations list screen
+- [x] Chat conversation screen
+- [x] Message send flow
+- [x] Backend conversation/message integration
+- [x] Unmatch API helper
+- [ ] Image/video chat messages
+- [ ] Voice notes
 - [ ] Typing indicators
-- [ ] Read receipts
-- [ ] Unmatch action
+- [ ] Read receipts UI
+- [ ] Real-time message updates
 
 ---
 
 ## Phase 5: Wallet & Token Economy
 
 ### 5.1 Wallet UI
-- [ ] Wallet balance display
-- [ ] Token packages screen
-- [ ] Purchase flow (iOS/Android IAP)
-- [ ] Transaction history
-- [ ] Bonus tokens display
+- [x] Wallet balance display
+- [x] Token packages screen
+- [x] Transaction history
+- [x] Bonus token display
+- [x] Backend wallet/package/history integration
 - [ ] Low balance warnings
 
 ### 5.2 In-App Purchases
-- [ ] iOS StoreKit integration
-- [ ] Android Billing Library integration
-- [ ] Purchase verification with backend
-- [ ] Receipt validation
+- [x] Backend purchase verification endpoints wired in client
+- [ ] iOS StoreKit checkout
+- [ ] Android Billing checkout
+- [ ] Receipt collection from native purchase APIs
 - [ ] Restore purchases
-- [ ] Purchase error handling
+- [ ] Purchase error recovery UX
 
 ### 5.3 Token Usage
-- [ ] Super like confirmation dialog
+- [x] Live video session cost display
+- [ ] Super-like confirmation dialog
 - [ ] Boost purchase and activation
 - [ ] Priority matching purchase
-- [ ] Live video session cost display
 - [ ] Insufficient balance handling
 
 ---
@@ -136,38 +155,41 @@ Flutter mobile app for iOS and Android. Provides user-facing features including 
 ## Phase 6: Live Video Matching
 
 ### 6.1 Live Match UI
-- [ ] Live match entry screen
-- [ ] Interest selection for matching
-- [ ] Search status screen (animated)
-- [ ] Wait time display
-- [ ] Cancel search button
-- [ ] Match found animation
-- [ ] Partner preview screen
+- [x] Live match entry screen
+- [x] Interest selection for matching
+- [x] Search status screen
+- [x] Wait time display
+- [x] Cancel search button
+- [x] Partner preview screen
+- [ ] Match found animation polish
 
 ### 6.2 LiveKit Integration
-- [ ] LiveKit Flutter SDK setup
+- [x] LiveKit native packages installed
+- [x] LiveKit import guarded for web and Expo Go
+- [x] Backend LiveKit token request wired
+- [ ] Native dev build validation
 - [ ] Video/audio room connection
-- [ ] Camera/microphone permissions
-- [ ] Video renderer (local + remote)
-- [ ] Audio-only mode toggle
-- [ ] Camera flip (front/back)
-- [ ] Mute/unmute controls
-- [ ] End call button
+- [ ] Camera/microphone permission flow
+- [ ] Local/remote video renderers
+- [ ] Mute, camera flip, audio-only, and end-call controls
 
 ### 6.3 Live Session Flow
-- [ ] WebSocket connection for status updates
+- [x] Start live match search
+- [x] Poll live match status
+- [x] Cancel live match search
+- [x] Join token request
+- [ ] WebSocket event stream integration
 - [ ] Join timeout handling
 - [ ] Connection quality indicator
 - [ ] Duration timer
 - [ ] Token consumption display
 - [ ] Extend session option
-- [ ] Network error handling
 
 ### 6.4 Post-Call Experience
 - [ ] Post-call feedback screen
 - [ ] Match/skip decision
-- [ ] Report/block options
-- [ ] Session summary (duration, cost)
+- [ ] Report/block from live call
+- [ ] Session summary
 - [ ] Return to pool option
 
 ---
@@ -175,13 +197,16 @@ Flutter mobile app for iOS and Android. Provides user-facing features including 
 ## Phase 7: Safety & Moderation
 
 ### 7.1 Safety Features
-- [ ] Report user flow (from profile, chat, live call)
-- [ ] Report categories selection
-- [ ] Evidence upload (screenshots)
-- [ ] Block user confirmation
-- [ ] Blocked users list
-- [ ] Community guidelines screen
+- [x] Report user flow from chat
+- [x] Report category selection
+- [x] Submit report to backend
+- [x] Block user from report flow
+- [x] Blocked users list
+- [x] Unblock user
+- [x] Community guidelines screen
+- [ ] Evidence upload for reports
 - [ ] Safety tips screen
+- [ ] Report/block entry points from profile and live call
 
 ### 7.2 Verification
 - [ ] Selfie verification flow
@@ -194,43 +219,48 @@ Flutter mobile app for iOS and Android. Provides user-facing features including 
 ## Phase 8: Notifications & Settings
 
 ### 8.1 Push Notifications
-- [ ] FCM/APNs setup
-- [ ] Token registration with backend
+- [x] Expo Notifications package installed
+- [x] Notification preferences UI
+- [x] Notification preferences backend integration
+- [ ] FCM/APNs project setup
+- [ ] Push token registration with backend
 - [ ] Foreground notification handling
 - [ ] Background notification handling
 - [ ] Deep link navigation from notifications
-- [ ] Notification preferences
 
 ### 8.2 Settings
-- [ ] Account settings screen
-- [ ] Notification preferences
-- [ ] Privacy settings
-- [ ] Blocked users management
-- [ ] Help & support
-- [ ] Terms of service
-- [ ] Privacy policy
-- [ ] Delete account flow
+- [x] Account settings screen
+- [x] Notification preferences
+- [x] Privacy preferences
+- [x] Blocked users management
+- [x] Help/support rows
+- [x] Terms of service row
+- [x] Privacy policy row
+- [x] Delete account flow with password confirmation
+- [ ] Open support/legal links in browser instead of alerts
+- [ ] Change password flow
+- [ ] Change email flow
 
 ---
 
 ## Phase 9: Polish & Optimization
 
 ### 9.1 UI/UX Polish
-- [ ] Loading states and skeletons
-- [ ] Error states with retry
-- [ ] Empty states
-- [ ] Animations and transitions
+- [x] Loading states for core screens
+- [x] Error states with retry on discovery
+- [x] Empty states for discovery, matches, blocked users
+- [x] Core live-search animation
 - [ ] Haptic feedback
-- [ ] Dark mode support
-- [ ] Accessibility (screen readers, font scaling)
+- [ ] Accessibility pass
+- [ ] Form validation polish
+- [ ] Skeleton loading states
 
 ### 9.2 Performance
-- [ ] Image caching (cached_network_image)
-- [ ] List view optimization
-- [ ] Memory leak prevention
-- [ ] App size optimization
+- [ ] Image caching
+- [ ] List view optimization pass
+- [ ] Memory leak audit
 - [ ] Startup time optimization
-- [ ] Network request optimization
+- [ ] Network request deduping/caching
 
 ### 9.3 Offline Support
 - [ ] Offline message queue
@@ -243,12 +273,15 @@ Flutter mobile app for iOS and Android. Provides user-facing features including 
 ## Phase 10: Testing & Release
 
 ### 10.1 Testing
-- [ ] Unit tests for business logic
-- [ ] Widget tests for UI components
-- [ ] Integration tests for critical flows
-- [ ] Manual testing on iOS devices
-- [ ] Manual testing on Android devices
-- [ ] Beta testing (TestFlight/Internal Testing)
+- [x] Mobile TypeScript verification
+- [x] Backend TypeScript verification
+- [x] In-app browser smoke check for sign-in screen
+- [ ] Unit tests for stores and API normalizers
+- [ ] Integration tests for auth/onboarding/discovery/chat
+- [ ] Manual testing on iOS device
+- [ ] Manual testing on Android device
+- [ ] Native dev build testing for LiveKit and billing
+- [ ] Beta testing
 
 ### 10.2 App Store Preparation
 - [ ] App Store screenshots
@@ -258,147 +291,13 @@ Flutter mobile app for iOS and Android. Provides user-facing features including 
 - [ ] App Store review preparation
 - [ ] Age rating configuration
 
-### 10.3 Release
-- [ ] iOS App Store submission
-- [ ] Google Play Store submission
-- [ ] Staged rollout plan
-- [ ] Crash reporting (Sentry/Firebase Crashlytics)
-- [ ] Analytics integration
-- [ ] Remote config for feature flags
-
 ---
 
-## Feature Module Structure
+## Immediate Next Todos
 
-```
-lib/
-├── core/
-│   ├── api/
-│   ├── auth/
-│   ├── storage/
-│   ├── theme/
-│   └── utils/
-├── features/
-│   ├── auth/
-│   │   ├── screens/
-│   │   ├── widgets/
-│   │   └── providers/
-│   ├── onboarding/
-│   ├── profile/
-│   ├── discovery/
-│   ├── matches_chat/
-│   ├── wallet/
-│   ├── live_match/
-│   ├── safety/
-│   └── settings/
-├── shared/
-│   ├── widgets/
-│   ├── models/
-│   └── constants/
-└── main.dart
-```
-
----
-
-## Key Dependencies
-
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  
-  # State Management
-  flutter_riverpod: ^2.x
-  
-  # Networking
-  dio: ^5.x
-  
-  # Storage
-  flutter_secure_storage: ^9.x
-  shared_preferences: ^2.x
-  
-  # Media
-  image_picker: ^1.x
-  video_player: ^2.x
-  cached_network_image: ^3.x
-  
-  # LiveKit
-  livekit_client: ^2.x
-  
-  # Location
-  geolocator: ^11.x
-  
-  # Notifications
-  firebase_messaging: ^14.x
-  
-  # IAP
-  in_app_purchase: ^3.x
-  
-  # UI
-  flutter_svg: ^2.x
-  shimmer: ^3.x
-  
-  # Utils
-  intl: ^0.19.x
-  url_launcher: ^6.x
-```
-
----
-
-## Environment Configuration
-
-```dart
-// lib/core/config/env.dart
-class Env {
-  static const String apiBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://localhost:3000',
-  );
-  
-  static const String imagekitPublicKey = String.fromEnvironment(
-    'IMAGEKIT_PUBLIC_KEY',
-  );
-  
-  static const String livekitUrl = String.fromEnvironment(
-    'LIVEKIT_URL',
-  );
-}
-```
-
----
-
-## Success Criteria
-
-- [ ] Users can sign up and create profiles
-- [ ] Profile photos upload to ImageKit successfully
-- [ ] Discovery feed loads and swipe actions work
-- [ ] Matches and chat functional
-- [ ] Token purchases work on iOS and Android
-- [ ] Live video matching connects successfully
-- [ ] Report/block features work
-- [ ] App passes App Store review
-- [ ] Crash-free rate > 99%
-- [ ] App size < 50MB
-
----
-
-## Development Iterations
-
-### Iteration 1: After Backend Phase 1-3
-- Auth, profile, media upload
-
-### Iteration 2: After Backend Phase 4-5
-- Discovery, matches, chat
-
-### Iteration 3: After Backend Phase 6
-- Wallet and token purchases
-
-### Iteration 4: After Backend Phase 7
-- Live video matching
-
-### Iteration 5: After Backend Phase 8
-- Safety features and polish
-
----
-
-**Reference**: See `docs/Delta_Developer_Documentation.docx` Section 7 for detailed mobile architecture.
+- [ ] Create native Expo dev build and verify LiveKit camera/microphone flow
+- [ ] Configure iOS StoreKit and Android Billing products
+- [ ] Add native purchase checkout and receipt handoff
+- [ ] Add WebSocket-based live match updates
+- [ ] Add push token registration endpoint/client flow
+- [ ] Add tests for API normalizers and auth/profile stores

@@ -44,7 +44,10 @@ export const LiveEntryScreen: React.FC<Props> = ({ navigation }) => {
         <Bullet>Matches you connect with stay in your matches list.</Bullet>
       </View>
 
-      <PrimaryButton title="Find a match" onPress={() => navigation.navigate('LiveSearching')} />
+      <PrimaryButton
+        title="Find a match"
+        onPress={() => navigation.navigate('LiveSearching', { interests: picked.length ? picked : ['Music'] })}
+      />
     </ScrollView>
   );
 };

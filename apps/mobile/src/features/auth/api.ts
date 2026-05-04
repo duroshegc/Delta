@@ -1,7 +1,5 @@
 import { apiClient } from '../../core/api/client';
 
-export type AuthIdentifier = { phone: string } | { email: string };
-
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
@@ -9,34 +7,69 @@ export interface AuthTokens {
 
 export interface AuthUser {
   id: string;
-  phone?: string;
   email?: string;
   profileComplete: boolean;
+  role?: string;
 }
 
+interface BackendAuthUser {
+  id: string;
+  email?: string;
+  role?: string;
+  profileComplete?: boolean;
+}
+
+interface BackendProfileSummary {
+  displayName?: string;
+  dateOfBirth?: string;
+  gender?: string | null;
+  intent?: string | null;
+  lookingFor?: string[];
+}
+
+const hasOnboardingProfile = (profile: BackendProfileSummary | null): boolean =>
+  Boolean(
+    profile?.displayName &&
+      profile.dateOfBirth &&
+      profile.gender &&
+      profile.intent &&
+      profile.lookingFor?.length,
+  );
+
+const normalizeUser = (user: BackendAuthUser, profileComplete?: boolean): AuthUser => ({
+  id: user.id,
+  email: user.email,
+  role: user.role,
+  profileComplete: profileComplete ?? Boolean(user.profileComplete),
+});
+
 export const authApi = {
-  async requestOtp(identifier: AuthIdentifier) {
-    const { data } = await apiClient.post<{ challengeId: string }>(
-      '/auth/otp/request',
-      identifier,
+  async signIn(email: string, password: string) {
+    const { data } = await apiClient.post<AuthTokens & { user: BackendAuthUser }>(
+      '/auth/signin',
+      { email, password },
     );
-    return data;
+    return { ...data, user: normalizeUser(data.user) };
   },
 
-  async verifyOtp(challengeId: string, code: string) {
-    const { data } = await apiClient.post<AuthTokens & { user: AuthUser }>(
-      '/auth/otp/verify',
-      { challengeId, code },
+  async signUp(email: string, password: string, name?: string) {
+    const { data } = await apiClient.post<AuthTokens & { user: BackendAuthUser }>(
+      '/auth/signup',
+      { email, password, name },
     );
-    return data;
+    return { ...data, user: normalizeUser(data.user) };
   },
 
   async me() {
-    const { data } = await apiClient.get<AuthUser>('/auth/me');
-    return data;
+    const { data } = await apiClient.get<{ user: BackendAuthUser }>('/auth/session');
+    const profile = await apiClient
+      .get<BackendProfileSummary | null>('/profiles/me')
+      .then((response) => response.data)
+      .catch(() => null);
+    return normalizeUser(data.user, hasOnboardingProfile(profile));
   },
 
   async logout() {
-    await apiClient.post('/auth/logout').catch(() => undefined);
+    await apiClient.post('/auth/signout').catch(() => undefined);
   },
 };

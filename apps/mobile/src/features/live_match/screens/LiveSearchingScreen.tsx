@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppColors, BorderRadius, Spacing, Typography } from '../../../core/theme';
 import { LiveMatchStackParamList } from '../../../navigation/types';
+import { LiveMatchResult, liveMatchApi } from '../api';
 
 type Props = NativeStackScreenProps<LiveMatchStackParamList, 'LiveSearching'>;
 
@@ -12,9 +13,11 @@ const formatElapsed = (seconds: number) => {
   return `${m}:${String(s).padStart(2, '0')}`;
 };
 
-export const LiveSearchingScreen: React.FC<Props> = ({ navigation }) => {
+export const LiveSearchingScreen: React.FC<Props> = ({ navigation, route }) => {
   const [elapsed, setElapsed] = useState(0);
+  const [ticketId, setTicketId] = useState<string | null>(null);
   const pulse = useRef(new Animated.Value(0)).current;
+  const completed = useRef(false);
 
   useEffect(() => {
     const tick = setInterval(() => setElapsed((s) => s + 1), 1000);
@@ -27,12 +30,66 @@ export const LiveSearchingScreen: React.FC<Props> = ({ navigation }) => {
     return () => clearInterval(tick);
   }, [pulse]);
 
-  // Demo: after 10s, advance to partner preview so the flow is navigable.
   useEffect(() => {
-    if (elapsed >= 10) {
-      navigation.replace('LivePartnerPreview', { partnerId: 'demo-partner' });
+    const handleResult = (result: LiveMatchResult) => {
+      setTicketId(result.ticket.id);
+      if (result.session && !completed.current) {
+        completed.current = true;
+        navigation.replace('LivePartnerPreview', {
+          sessionId: result.session.sessionId,
+          roomName: result.session.roomName,
+          interest: result.session.interest,
+        });
+      }
+    };
+
+    let cancelled = false;
+    liveMatchApi
+      .search(route.params.interests)
+      .then((result) => {
+        if (!cancelled) handleResult(result);
+      })
+      .catch((err: any) => {
+        Alert.alert('Could not start live match', err?.response?.data?.message ?? err.message, [
+          { text: 'OK', onPress: () => navigation.goBack() },
+        ]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigation, route.params.interests]);
+
+  useEffect(() => {
+    if (!ticketId || completed.current) return;
+    const poll = setInterval(async () => {
+      try {
+        const result = await liveMatchApi.status(ticketId);
+        if (result.session && !completed.current) {
+          completed.current = true;
+          navigation.replace('LivePartnerPreview', {
+            sessionId: result.session.sessionId,
+            roomName: result.session.roomName,
+            interest: result.session.interest,
+          });
+        }
+      } catch {
+        // Keep the search UI alive; explicit cancel still works.
+      }
+    }, 4000);
+    return () => clearInterval(poll);
+  }, [navigation, ticketId]);
+
+  const onCancel = async () => {
+    if (ticketId) {
+      try {
+        await liveMatchApi.cancel(ticketId);
+      } catch {
+        // Leaving the screen is still the user's intent.
+      }
     }
-  }, [elapsed, navigation]);
+    navigation.goBack();
+  };
 
   const ringStyle = (delay: number) => ({
     opacity: pulse.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.4, 0.15, 0] }),
@@ -55,11 +112,11 @@ export const LiveSearchingScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       <Text style={styles.title}>Searching for a match…</Text>
-      <Text style={styles.subtitle}>Average wait: under a minute</Text>
+      <Text style={styles.subtitle}>{ticketId ? 'Search ticket active' : 'Starting search'}</Text>
       <Text style={styles.timer}>{formatElapsed(elapsed)}</Text>
 
       <Pressable
-        onPress={() => navigation.goBack()}
+        onPress={onCancel}
         style={({ pressed }) => [styles.cancel, pressed && styles.pressed]}
       >
         <Text style={styles.cancelLabel}>Cancel</Text>
