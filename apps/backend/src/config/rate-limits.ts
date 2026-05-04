@@ -1,3 +1,5 @@
+import { env } from "./env";
+
 /**
  * Rate limit configurations for different endpoint types
  * All windows are in seconds
@@ -19,8 +21,8 @@ export const RATE_LIMITS = {
 
   // Authentication endpoints (stricter limits)
   AUTH: {
-    max: 5,
-    window: 900, // 15 minutes
+    max: env.AUTH_RATE_LIMIT_MAX,
+    window: env.AUTH_RATE_LIMIT_WINDOW_SECONDS,
     message: "Too many authentication attempts, please try again later",
   },
 

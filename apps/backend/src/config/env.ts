@@ -69,6 +69,10 @@ const envSchema = z.object({
   LOG_LEVEL: z
     .enum(["trace", "debug", "info", "warn", "error", "fatal"])
     .default("info"),
+
+  // Rate limits
+  AUTH_RATE_LIMIT_MAX: z.string().default("20").transform(Number),
+  AUTH_RATE_LIMIT_WINDOW_SECONDS: z.string().default("300").transform(Number),
 });
 
 export type Env = z.infer<typeof envSchema>;
