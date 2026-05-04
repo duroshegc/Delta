@@ -167,6 +167,22 @@ export class ExternalServiceError extends AppError {
 }
 
 /**
+ * Service unavailable error (503)
+ * Used when required dependencies are unavailable
+ */
+export class ServiceUnavailableError extends AppError {
+  constructor(message: string = "Service unavailable", details?: unknown, cause?: Error) {
+    super({
+      message,
+      statusCode: 503,
+      code: "SERVICE_UNAVAILABLE",
+      details,
+      cause,
+    });
+  }
+}
+
+/**
  * Bad request error (400)
  * Used for general bad request errors
  */

@@ -234,9 +234,11 @@ async function createSession(
   await db.collection("sessions").insertOne({
     _id: sessionId,
     userId: new ObjectId(userId),
+    token: tokens.accessToken,
     refreshTokenId: tokens.refreshToken.substring(0, 32), // Store token prefix for tracking
     expiresAt,
     createdAt: now,
+    updatedAt: now,
     lastActivityAt: now,
   });
 

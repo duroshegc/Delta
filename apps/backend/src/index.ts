@@ -19,6 +19,7 @@ import {
 } from "./modules/live-match/routes";
 import { moderationRoutes } from "./modules/moderation/routes";
 import { adminRoutes } from "./modules/admin/routes";
+import { ServiceUnavailableError } from "./utils/errors";
 
 function corsOriginConfig(): true | string[] {
   if (env.APP_ENV === "development") return true;
@@ -140,6 +141,20 @@ const app = new Elysia()
       },
     },
   )
+  .derive(async () => {
+    try {
+      await connectDatabase();
+      getRedis();
+      return {};
+    } catch (error) {
+      logger.error({ error }, "Core services are not ready");
+      throw new ServiceUnavailableError(
+        "Core services are not ready. Verify MongoDB, Redis, and environment variables.",
+        { database: "required", redis: "required" },
+        error instanceof Error ? error : undefined,
+      );
+    }
+  })
   // Mount authentication routes
   .use(authRoutes)
   // Mount user management routes
