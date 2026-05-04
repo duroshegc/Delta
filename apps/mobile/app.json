@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "mobile",
+    "slug": "mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "android": {
+      "package": "com.delta.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "@livekit/react-native-expo-plugin",
+      "@config-plugins/react-native-webrtc"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.delta.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Delta uses your camera for live video matching and profile photos.",
+        "NSMicrophoneUsageDescription": "Delta uses your microphone for live video matching.",
+        "NSPhotoLibraryUsageDescription": "Delta accesses your photos so you can upload profile media."
+      }
+    }
+  }
+}

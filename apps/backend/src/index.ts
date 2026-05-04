@@ -34,6 +34,12 @@ function corsOriginConfig(): true | string[] {
   return [...origins];
 }
 
+function corsOriginConfig(): true | string[] {
+  if (env.APP_ENV === "development") return true;
+  const origins = new Set<string>([env.API_PUBLIC_URL, ...env.CORS_ALLOWED_ORIGINS]);
+  return [...origins];
+}
+
 const app = new Elysia()
   .use(
     cors({
