@@ -19,6 +19,12 @@ type SignInResponse = {
   expiresAt: string;
 };
 
+type RefreshResponse = {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+};
+
 type BackendUser = Partial<AdminUser> & {
   id: string;
   email: string;
@@ -49,7 +55,19 @@ function getStoredToken() {
   return window.localStorage.getItem("delta_admin_token") || "";
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+function getStoredRefreshToken() {
+  if (typeof window === "undefined") return "";
+  return window.localStorage.getItem("delta_admin_refresh_token") || "";
+}
+
+function saveTokenPair(tokens: RefreshResponse) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem("delta_admin_token", tokens.accessToken);
+  window.localStorage.setItem("delta_admin_refresh_token", tokens.refreshToken);
+  window.localStorage.setItem("delta_admin_session_expires_at", String(new Date(tokens.expiresAt).getTime()));
+}
+
+async function request<T>(path: string, init?: RequestInit, retry = true): Promise<T> {
   const token = getStoredToken();
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
@@ -61,18 +79,52 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    let message = `Request failed: ${response.status}`;
-    try {
-      const errorPayload = (await response.json()) as Partial<ApiEnvelope<unknown>>;
-      message = errorPayload.message || errorPayload.error || message;
-    } catch {
-      // Keep the status-based message when the backend does not return JSON.
+    const message = await responseMessage(response);
+    if (retry && response.status === 401 && path !== "/auth/signin" && path !== "/auth/refresh") {
+      const refreshed = await refreshSession();
+      if (refreshed) return request<T>(path, init, false);
     }
     throw new Error(message);
   }
 
   const payload = (await response.json()) as ApiEnvelope<T>;
   return payload.data;
+}
+
+async function responseMessage(response: Response) {
+  let message = `Request failed: ${response.status}`;
+  try {
+    const errorPayload = (await response.json()) as Partial<ApiEnvelope<unknown>>;
+    message = errorPayload.message || errorPayload.error || message;
+  } catch {
+    // Keep the status-based message when the backend does not return JSON.
+  }
+  return message;
+}
+
+async function refreshSession() {
+  const refreshToken = getStoredRefreshToken();
+  if (!refreshToken) return false;
+
+  const response = await fetch(`${API_URL}/auth/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  if (!response.ok) return false;
+  const payload = (await response.json()) as ApiEnvelope<RefreshResponse>;
+  saveTokenPair(payload.data);
+  return true;
+}
+
+async function named<T>(label: string, fetcher: () => Promise<T>) {
+  try {
+    return await fetcher();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Request failed";
+    throw new Error(`${label}: ${message}`);
+  }
 }
 
 async function withFallback<T>(fetcher: () => Promise<T>, fallback: T) {
@@ -190,10 +242,10 @@ export const adminApi = {
   },
   dashboard: async (): Promise<AdminDataset> => {
     const [analytics, users, reports, sessions] = await Promise.all([
-      adminApi.analytics(),
-      adminApi.users(),
-      adminApi.reports(),
-      adminApi.sessions(),
+      named("Analytics", adminApi.analytics),
+      named("Users", () => adminApi.users()),
+      named("Reports", () => adminApi.reports()),
+      named("Live sessions", () => adminApi.sessions()),
     ]);
 
     return {

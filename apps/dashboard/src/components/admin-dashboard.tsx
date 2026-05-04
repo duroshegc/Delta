@@ -625,13 +625,13 @@ export function AdminDashboard() {
 
   const resolvedActiveView = visibleNav.some((item) => item.key === activeView) ? activeView : "overview";
 
-  const selectedUser = data.users.find((user) => user.id === selectedUserId) || data.users[0]!;
-  const selectedReport = data.reports.find((report) => report.id === selectedReportId) || data.reports[0]!;
-  const selectedCase = data.cases.find((entry) => entry.reportId === selectedReport.id) || data.cases[0]!;
-  const selectedSession = data.sessions.find((session) => session.sessionId === selectedSessionId) || data.sessions[0]!;
-  const selectedMedia = data.media.find((item) => item.id === selectedMediaId) || data.media[0]!;
-  const selectedWallet = data.wallets.find((wallet) => wallet.userId === selectedWalletId) || data.wallets[0]!;
-  const selectedTrustScore = data.trustScores.find((score) => score.userId === selectedTrustId) || data.trustScores[0]!;
+  const selectedUser = data.users.find((user) => user.id === selectedUserId) || data.users[0] || null;
+  const selectedReport = data.reports.find((report) => report.id === selectedReportId) || data.reports[0] || null;
+  const selectedCase = (selectedReport ? data.cases.find((entry) => entry.reportId === selectedReport.id) : null) || data.cases[0] || null;
+  const selectedSession = data.sessions.find((session) => session.sessionId === selectedSessionId) || data.sessions[0] || null;
+  const selectedMedia = data.media.find((item) => item.id === selectedMediaId) || data.media[0] || null;
+  const selectedWallet = data.wallets.find((wallet) => wallet.userId === selectedWalletId) || data.wallets[0] || null;
+  const selectedTrustScore = data.trustScores.find((score) => score.userId === selectedTrustId) || data.trustScores[0] || null;
 
   const userRegions = unique(data.users.map((user) => user.region));
   const reportCategories = unique(data.reports.map((report) => report.category));
@@ -807,7 +807,7 @@ export function AdminDashboard() {
           <TrustView
             data={data}
             selectedScore={selectedTrustScore}
-            selectedUser={data.users.find((user) => user.id === selectedTrustScore?.userId) || selectedUser}
+            selectedUser={(selectedTrustScore ? data.users.find((user) => user.id === selectedTrustScore.userId) : null) || selectedUser}
             onSelect={setSelectedTrustId}
             onUserAction={handleUserAction}
           />
@@ -918,7 +918,7 @@ function UsersView({
 }: {
   users: AdminUser[];
   allUsers: AdminUser[];
-  selectedUser: AdminUser;
+  selectedUser: AdminUser | null;
   filters: Record<string, string>;
   regions: string[];
   page: number;
@@ -958,7 +958,7 @@ function UsersView({
           <Pagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
         </div>
 
-        <div className="panel detail-panel">
+        {selectedUser ? <div className="panel detail-panel">
           <PanelHeader title="User detail" subtitle={selectedUser.email} icon={UserCog} />
           <div className="detail-hero">
             <div className="avatar large">{initials(selectedUser.name)}</div>
@@ -1009,7 +1009,7 @@ function UsersView({
             <ActionButton disabled={!canTakeUserAction(role)} icon={Gauge} label="Adjust trust" onClick={() => onAction(selectedUser.id, "adjust_trust")} />
             <ActionButton icon={FileText} label="Add note" onClick={() => onNote(selectedUser.id)} />
           </div>
-        </div>
+        </div> : <EmptyDetail title="No user selected" body="No users matched this view yet" icon={UserCog} />}
       </section>
     </div>
   );
@@ -1029,7 +1029,7 @@ function ReportsView({
   onAction,
 }: {
   reports: AdminReport[];
-  selectedReport: AdminReport;
+  selectedReport: AdminReport | null;
   selectedIds: string[];
   filters: Record<string, string>;
   categories: string[];
@@ -1073,7 +1073,7 @@ function ReportsView({
             ])}
           />
         </div>
-        <ReportDetail report={selectedReport} role={role} onAction={onAction} />
+        {selectedReport ? <ReportDetail report={selectedReport} role={role} onAction={onAction} /> : <EmptyDetail title="No report selected" body="No reports matched this view yet" icon={ShieldAlert} />}
       </section>
     </div>
   );
@@ -1125,7 +1125,7 @@ function CasesView({
   onAction,
 }: {
   cases: ModerationCase[];
-  selectedCase: ModerationCase;
+  selectedCase: ModerationCase | null;
   status: string;
   role: AdminRole;
   onStatusChange: (status: string) => void;
@@ -1151,7 +1151,7 @@ function CasesView({
             ])}
           />
         </div>
-        <div className="panel detail-panel">
+        {selectedCase ? <div className="panel detail-panel">
           <PanelHeader title="Case controls" subtitle={selectedCase.id} icon={Shield} />
           <InfoList rows={[["Template", selectedCase.template], ["Report", selectedCase.reportId], ["Target user", selectedCase.targetUserId], ["Appeal", humanize(selectedCase.appealStatus)]]} />
           <SectionTitle title="Workflow timeline" />
@@ -1168,7 +1168,7 @@ function CasesView({
             <ActionButton disabled={!canModerate(role)} icon={CheckCircle2} label="Resolve" onClick={() => onAction(selectedCase.id, "resolve")} />
             <ActionButton disabled={!canModerate(role)} icon={MessageCircle} label="Appeal" onClick={() => onAction(selectedCase.id, "appeal")} />
           </div>
-        </div>
+        </div> : <EmptyDetail title="No case selected" body="No moderation cases matched this view yet" icon={Shield} />}
       </section>
     </div>
   );
@@ -1186,7 +1186,7 @@ function SessionsView({
   onAction,
 }: {
   sessions: LiveSession[];
-  selectedSession: LiveSession;
+  selectedSession: LiveSession | null;
   filters: { query: string; status: string; region: string; interest: string; reportedOnly: boolean };
   regions: string[];
   interests: string[];
@@ -1222,7 +1222,7 @@ function SessionsView({
             ])}
           />
         </div>
-        <div className="panel detail-panel">
+        {selectedSession ? <div className="panel detail-panel">
           <PanelHeader title="Session detail" subtitle={selectedSession.sessionId} icon={Radio} />
           <InfoList rows={[["Room", selectedSession.roomName], ["Participants", selectedSession.participantNames.join(", ")], ["Started", selectedSession.startedAt ? formatDate(selectedSession.startedAt) : "n/a"], ["Ended", selectedSession.endedAt ? formatDate(selectedSession.endedAt) : "n/a"], ["Disconnect", selectedSession.disconnectReason], ["Charge", `${selectedSession.chargeDelt} delt`]]} />
           <SectionTitle title="Connection quality" />
@@ -1240,7 +1240,7 @@ function SessionsView({
             <ActionButton disabled={!canAct} icon={AlertTriangle} label="Flag" onClick={() => onAction(selectedSession.sessionId, "flag")} />
             <ActionButton disabled={!canAct} icon={FileText} label="Note" onClick={() => onAction(selectedSession.sessionId, "note")} />
           </div>
-        </div>
+        </div> : <EmptyDetail title="No session selected" body="No live sessions matched this view yet" icon={Radio} />}
       </section>
     </div>
   );
@@ -1259,7 +1259,7 @@ function MediaView({
   onAction,
 }: {
   media: MediaReviewItem[];
-  selectedMedia: MediaReviewItem;
+  selectedMedia: MediaReviewItem | null;
   filters: Record<string, string>;
   selectedIds: string[];
   role: AdminRole;
@@ -1284,7 +1284,7 @@ function MediaView({
           <PanelHeader title="Media queue" subtitle="Profile, verification, chat, and evidence media" icon={Image} />
           <div className="media-grid">
             {media.map((item) => (
-              <article className={selectedMedia.id === item.id ? "media-card active" : "media-card"} key={item.id}>
+              <article className={selectedMedia?.id === item.id ? "media-card active" : "media-card"} key={item.id}>
                 <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => onToggle(item.id)} aria-label={`Select ${item.id}`} />
                 <button type="button" onClick={() => onSelect(item.id)}>
                   <span className="media-thumb" style={{ background: item.thumbnail }} />
@@ -1296,7 +1296,7 @@ function MediaView({
             ))}
           </div>
         </div>
-        <div className="panel detail-panel">
+        {selectedMedia ? <div className="panel detail-panel">
           <PanelHeader title="Review media" subtitle={selectedMedia.id} icon={ShieldCheck} />
           <div className="media-viewer" style={{ background: selectedMedia.thumbnail }}>
             <span>{initials(selectedMedia.userName)}</span>
@@ -1314,7 +1314,7 @@ function MediaView({
             <ActionButton disabled={!canAct} icon={AlertTriangle} label="Escalate" onClick={() => onAction(selectedMedia.id, "escalated")} />
             <ActionButton disabled={!canAct} icon={Image} label="Re-upload" onClick={() => onAction(selectedMedia.id, "request_reupload")} />
           </div>
-        </div>
+        </div> : <EmptyDetail title="No media selected" body="No media items matched this view yet" icon={ShieldCheck} />}
       </section>
     </div>
   );
@@ -1328,8 +1328,8 @@ function TrustView({
   onUserAction,
 }: {
   data: AdminDataset;
-  selectedScore: TrustScoreRecord;
-  selectedUser: AdminUser;
+  selectedScore: TrustScoreRecord | null;
+  selectedUser: AdminUser | null;
   onSelect: (id: string) => void;
   onUserAction: (id: string, action: string) => void;
 }) {
@@ -1373,7 +1373,7 @@ function TrustView({
             ])}
           />
         </div>
-        <div className="panel detail-panel">
+        {selectedScore ? <div className="panel detail-panel">
           <PanelHeader title="Score detail" subtitle={selectedScore.userName} icon={ShieldAlert} />
           <TrustMeter value={selectedScore.score} large />
           <SectionTitle title="Factors" />
@@ -1389,11 +1389,11 @@ function TrustView({
             {selectedScore.triggers.map((trigger) => <StatusRow key={trigger.label} label={trigger.label} value={`Threshold ${trigger.threshold}`} tone={trigger.enabled ? "success" : "neutral"} />)}
           </div>
           <div className="action-grid">
-            <ActionButton icon={Gauge} label="Adjust trust" onClick={() => onUserAction(selectedUser.id, "adjust_trust")} />
-            <ActionButton icon={Video} label="Disable live" onClick={() => onUserAction(selectedUser.id, "disable_live")} />
-            <ActionButton icon={ShieldCheck} label="Require verification" onClick={() => onUserAction(selectedUser.id, "require_verification")} />
+            <ActionButton disabled={!selectedUser} icon={Gauge} label="Adjust trust" onClick={() => selectedUser && onUserAction(selectedUser.id, "adjust_trust")} />
+            <ActionButton disabled={!selectedUser} icon={Video} label="Disable live" onClick={() => selectedUser && onUserAction(selectedUser.id, "disable_live")} />
+            <ActionButton disabled={!selectedUser} icon={ShieldCheck} label="Require verification" onClick={() => selectedUser && onUserAction(selectedUser.id, "require_verification")} />
           </div>
-        </div>
+        </div> : <EmptyDetail title="No trust record selected" body="No trust score records are available yet" icon={ShieldAlert} />}
       </section>
     </div>
   );
@@ -1413,7 +1413,7 @@ function WalletView({
 }: {
   analytics: AdminDataset["analytics"];
   wallets: WalletSummary[];
-  selectedWallet: WalletSummary;
+  selectedWallet: WalletSummary | null;
   query: string;
   transactionFilter: string;
   role: AdminRole;
@@ -1422,7 +1422,7 @@ function WalletView({
   onSelect: (id: string) => void;
   onAction: (id: string, action: string) => void;
 }) {
-  const transactions = selectedWallet.transactions.filter((transaction) => transactionFilter === "all" || transaction.status === transactionFilter || transaction.type === transactionFilter);
+  const transactions = selectedWallet?.transactions.filter((transaction) => transactionFilter === "all" || transaction.status === transactionFilter || transaction.type === transactionFilter) || [];
   return (
     <div className="view-stack">
       <section className="metric-grid compact">
@@ -1449,7 +1449,7 @@ function WalletView({
             ])}
           />
         </div>
-        <div className="panel detail-panel">
+        {selectedWallet ? <div className="panel detail-panel">
           <PanelHeader title="Wallet detail" subtitle={selectedWallet.userName} icon={Coins} />
           <div className="mini-grid">
             <InfoTile label="Balance" value={`${formatNumber(selectedWallet.balance)} delt`} />
@@ -1467,7 +1467,7 @@ function WalletView({
             <ActionButton disabled={!canUseWallet(role)} icon={Coins} label="Refund" onClick={() => onAction(selectedWallet.userId, "refund")} />
             <ActionButton disabled={!canUseWallet(role)} icon={CircleDollarSign} label="Adjust" onClick={() => onAction(selectedWallet.userId, "adjust")} />
           </div>
-        </div>
+        </div> : <EmptyDetail title="No wallet selected" body="No wallet records matched this view yet" icon={Coins} />}
       </section>
       <section className="three-column-grid">
         <BreakdownPanel title="Revenue by region" icon={MapPin} items={analytics.revenue.byRegion} />
@@ -1670,6 +1670,15 @@ function PanelHeader({ title, subtitle, icon: Icon }: { title: string; subtitle:
         <p>{subtitle}</p>
       </div>
       <Icon size={20} />
+    </div>
+  );
+}
+
+function EmptyDetail({ title, body, icon }: { title: string; body: string; icon: ElementType }) {
+  return (
+    <div className="panel detail-panel empty-panel">
+      <PanelHeader title={title} subtitle="Live backend data" icon={icon} />
+      <p>{body}</p>
     </div>
   );
 }
