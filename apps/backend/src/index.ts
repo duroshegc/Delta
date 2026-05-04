@@ -25,6 +25,10 @@ function corsOriginConfig(): true | string[] {
   if (env.APP_ENV === "development") return true;
   const origins = new Set<string>([
     env.API_PUBLIC_URL,
+    "http://localhost:8081",
+    "http://127.0.0.1:8081",
+    "http://localhost:19006",
+    "http://127.0.0.1:19006",
     "http://localhost:3001",
     "http://127.0.0.1:3001",
     "http://localhost:3002",

@@ -6,8 +6,16 @@ import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { AuthStackParamList } from '../../../navigation/types';
 import { useAuthStore } from '../store';
 import { TextField } from '../../../shared/components/TextField';
+import { getApiErrorMessage } from '../../../core/api/errors';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'SignIn'>;
+
+const isValidSignupPassword = (value: string) =>
+  value.length >= 8 &&
+  /[A-Z]/.test(value) &&
+  /[a-z]/.test(value) &&
+  /[0-9]/.test(value) &&
+  /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(value);
 
 export const SignInScreen: React.FC<Props> = ({ navigation }) => {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -15,12 +23,14 @@ export const SignInScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const signIn = useAuthStore((s) => s.signIn);
   const signUp = useAuthStore((s) => s.signUp);
 
   const onSubmit = async () => {
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail || password.length < 8) return;
+    setError(null);
     setSubmitting(true);
     try {
       if (mode === 'signin') {
@@ -29,16 +39,20 @@ export const SignInScreen: React.FC<Props> = ({ navigation }) => {
         await signUp(trimmedEmail, password, name.trim() || undefined);
       }
     } catch (err: any) {
+      const message = getApiErrorMessage(err);
+      setError(message);
       Alert.alert(
         mode === 'signin' ? 'Could not sign in' : 'Could not create account',
-        err?.response?.data?.message ?? err.message,
+        message,
       );
     } finally {
       setSubmitting(false);
     }
   };
 
-  const canSubmit = email.trim().includes('@') && password.length >= 8;
+  const hasEmail = email.trim().includes('@');
+  const canSubmit =
+    hasEmail && (mode === 'signin' ? password.length > 0 : isValidSignupPassword(password));
 
   return (
     <KeyboardAvoidingView
@@ -75,11 +89,16 @@ export const SignInScreen: React.FC<Props> = ({ navigation }) => {
           label="Password"
           value={password}
           onChangeText={setPassword}
-          placeholder="At least 8 characters"
+          placeholder={mode === 'signin' ? 'Your password' : '8+ chars, Aa, 1, symbol'}
           secureTextEntry
           autoCapitalize="none"
           autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
         />
+        {mode === 'signup' && (
+          <Text style={styles.passwordHint}>
+            Use 8+ characters with uppercase, lowercase, number, and symbol
+          </Text>
+        )}
         <Pressable
           onPress={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
           style={({ pressed }) => [styles.modeLink, pressed && styles.pressed]}
@@ -88,6 +107,11 @@ export const SignInScreen: React.FC<Props> = ({ navigation }) => {
             {mode === 'signin' ? 'Need an account? Create one' : 'Already have an account? Sign in'}
           </Text>
         </Pressable>
+        {error && (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        )}
       </View>
       <PrimaryButton
         title={mode === 'signin' ? 'Sign in' : 'Create account'}
@@ -104,7 +128,17 @@ const styles = StyleSheet.create({
   body: { flex: 1, justifyContent: 'center' },
   heading: { ...Typography.h1, color: AppColors.textPrimary, marginBottom: Spacing.sm },
   caption: { ...Typography.body, color: AppColors.textSecondary, marginBottom: Spacing.xl },
+  passwordHint: { ...Typography.caption, color: AppColors.textSecondary, marginTop: -Spacing.sm },
   modeLink: { alignSelf: 'center', marginTop: Spacing.sm, padding: Spacing.sm },
   modeText: { ...Typography.bodyMedium, color: AppColors.primary },
+  errorBox: {
+    backgroundColor: AppColors.dangerBg,
+    borderWidth: 1,
+    borderColor: AppColors.danger,
+    borderRadius: 12,
+    padding: Spacing.md,
+    marginTop: Spacing.md,
+  },
+  errorText: { ...Typography.body, color: AppColors.danger },
   pressed: { opacity: 0.75 },
 });
