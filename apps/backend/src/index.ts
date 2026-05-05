@@ -38,6 +38,8 @@ function corsOriginConfig(): true | string[] {
   return [...origins];
 }
 
+/** Single in-flight connection; awaited by every HTTP route (avoids serverless races with /health). */
+const mongoReady = connectDatabase();
 
 const app = new Elysia()
   .use(
@@ -81,6 +83,28 @@ const app = new Elysia()
   )
   // Enhanced error handling middleware
   .use(errorHandler)
+  .onBeforeHandle(async ({ request }) => {
+    if (request.method === "OPTIONS") return;
+
+    const path = new URL(request.url).pathname;
+    const isHealthProbe = path === "/health" || path === "/";
+
+    try {
+      await mongoReady;
+    } catch (err) {
+      if (isHealthProbe) {
+        // Let /health report degraded JSON; still block until we know connection outcome.
+        return;
+      }
+      logger.error({ err }, "Core services are not ready");
+      throw new ServiceUnavailableError(
+        "Core services are not ready. Verify MongoDB, Redis, and environment variables.",
+        { database: "required", redis: "required" },
+        err instanceof Error ? err : undefined,
+      );
+    }
+    getRedis();
+  })
   // Global rate limiting (optional - can be enabled per route)
   // .onBeforeHandle(globalRateLimit())
   .get(
@@ -146,20 +170,6 @@ const app = new Elysia()
       },
     },
   )
-  .derive(async () => {
-    try {
-      await connectDatabase();
-      getRedis();
-      return {};
-    } catch (error) {
-      logger.error({ error }, "Core services are not ready");
-      throw new ServiceUnavailableError(
-        "Core services are not ready. Verify MongoDB, Redis, and environment variables.",
-        { database: "required", redis: "required" },
-        error instanceof Error ? error : undefined,
-      );
-    }
-  })
   // Mount authentication routes
   .use(authRoutes)
   // Mount user management routes
@@ -188,10 +198,7 @@ const app = new Elysia()
 // Initialize database connection before starting server
 async function startServer() {
   try {
-    // Connect to MongoDB
-    await connectDatabase();
-
-    // Initialize Redis (lazy connection)
+    await mongoReady;
     getRedis();
 
     // Start server
@@ -206,8 +213,8 @@ async function startServer() {
         "🚀 Delta API server started",
       );
     });
-  } catch (error) {
-    logger.error({ error }, "Failed to start server");
+  } catch (err) {
+    logger.error({ err }, "Failed to start server");
     process.exit(1);
   }
 }
