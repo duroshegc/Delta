@@ -1,14 +1,15 @@
 /**
  * Delta App Theme System
- * Central export for all theme-related constants
  */
 
-import { AppColors, Gradients } from './colors';
+import { AppColors, Gradients, Shadows, ProfileGradientCycle, pickProfileGradient } from './colors';
 import { Typography, FontSizes, FontWeights, LineHeights, FontFamilies } from './typography';
 import { Spacing, BorderRadius, ButtonHeights, Durations } from './spacing';
 
 export const Theme = {
   colors: AppColors,
+  gradients: Gradients,
+  shadows: Shadows,
   typography: Typography,
   fontSizes: FontSizes,
   fontWeights: FontWeights,
@@ -17,10 +18,12 @@ export const Theme = {
   borderRadius: BorderRadius,
 } as const;
 
-// Re-export individual modules for convenience
 export {
   AppColors,
   Gradients,
+  Shadows,
+  ProfileGradientCycle,
+  pickProfileGradient,
   Typography,
   FontSizes,
   FontWeights,
@@ -33,5 +36,3 @@ export {
 };
 
 export type ThemeType = typeof Theme;
-
-// Made with Bob

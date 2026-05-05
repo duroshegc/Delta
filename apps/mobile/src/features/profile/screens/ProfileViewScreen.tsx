@@ -1,12 +1,16 @@
 import React, { useEffect } from 'react';
 import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppColors, BorderRadius, Spacing, Typography } from '../../../core/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { AppColors, BorderRadius, Gradients, Shadows, Spacing, Typography, pickProfileGradient } from '../../../core/theme';
 import { useProfileStore } from '../store';
 import { useAuthStore } from '../../auth/store';
 import { ProfileStackParamList } from '../../../navigation/types';
 import { ageFromBirthDate, genderLabels, intentLabels } from '../utils';
 import { PhotoGrid } from '../components/PhotoGrid';
+import { ScreenBackdrop } from '../../../shared/components/ScreenBackdrop';
+import { PrimaryButton } from '../../../shared/components/PrimaryButton';
+import { SectionHeader } from '../../../shared/components/SectionHeader';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'ProfileView'>;
 
@@ -22,153 +26,207 @@ export const ProfileViewScreen: React.FC<Props> = ({ navigation }) => {
 
   if (loading && !profile) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator color={AppColors.primary} />
-      </View>
+      <ScreenBackdrop tone="mixed">
+        <View style={styles.center}>
+          <ActivityIndicator color={AppColors.primary} />
+        </View>
+      </ScreenBackdrop>
     );
   }
 
   if (!profile) {
     return (
-      <View style={[styles.container, styles.center]}>
-        <Text style={styles.muted}>Couldn't load profile.</Text>
-      </View>
+      <ScreenBackdrop tone="mixed">
+        <View style={styles.center}>
+          <Text style={styles.muted}>Couldn't load profile.</Text>
+        </View>
+      </ScreenBackdrop>
     );
   }
 
   const age = ageFromBirthDate(profile.birthDate);
   const cover = profile.photos?.[0];
+  const grad = pickProfileGradient(profile.displayName ?? 'Delta');
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.cover}>
-        {cover ? (
-          <Image source={{ uri: cover.url }} style={styles.coverImage} />
-        ) : (
-          <View style={[styles.coverImage, styles.coverPlaceholder]}>
-            <Text style={styles.coverPlaceholderText}>Add a photo</Text>
+    <ScreenBackdrop tone="mixed">
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.cover}>
+          <View style={[styles.coverFrame, Shadows.medium]}>
+            {cover ? (
+              <Image source={{ uri: cover.url }} style={styles.coverImage} />
+            ) : (
+              <LinearGradient
+                colors={grad as unknown as string[]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.coverImage}
+              >
+                <Text style={styles.coverInitial}>{(profile.displayName ?? '?').charAt(0).toUpperCase()}</Text>
+              </LinearGradient>
+            )}
+            <LinearGradient
+              colors={['transparent', 'rgba(28,15,20,0.78)']}
+              style={styles.coverOverlay}
+            />
+            <View style={styles.coverHeader}>
+              <View style={styles.coverNameRow}>
+                <Text style={styles.coverName}>
+                  {profile.displayName}
+                  {age !== null ? <Text style={styles.coverAge}>, {age}</Text> : null}
+                </Text>
+                {profile.verified && (
+                  <View style={styles.verifiedBadge}>
+                    <Text style={styles.verifiedGlyph}>✓</Text>
+                  </View>
+                )}
+              </View>
+              {profile.location?.city && (
+                <View style={styles.locationRow}>
+                  <Text style={styles.locationGlyph}>◉</Text>
+                  <Text style={styles.locationText}>{profile.location.city}</Text>
+                </View>
+              )}
+            </View>
+            <Pressable
+              onPress={() => navigation.navigate('Settings')}
+              style={({ pressed }) => [styles.gearBtn, pressed && { opacity: 0.85 }]}
+            >
+              <Text style={styles.gearGlyph}>⚙</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeader
+            title="Photos"
+            actionLabel="Manage"
+            onAction={() => navigation.navigate('ProfileEdit')}
+          />
+          <PhotoGrid />
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeader title="About" />
+          <View style={[styles.card, Shadows.soft]}>
+            <Text style={styles.body}>
+              {profile.bio || 'Add a short bio so people get a feel for you.'}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <SectionHeader title="Identity" />
+          <View style={styles.metaRow}>
+            {profile.gender && <Pill label={genderLabels[profile.gender] ?? profile.gender} />}
+            {profile.intent && <Pill label={intentLabels[profile.intent] ?? profile.intent} tone="brand" />}
+            {profile.verified && <Pill label="Verified" tone="live" />}
+          </View>
+        </View>
+
+        {profile.interests?.length > 0 && (
+          <View style={styles.section}>
+            <SectionHeader title="Interests" />
+            <View style={styles.metaRow}>
+              {profile.interests.map((i) => (
+                <Pill key={i} label={i} />
+              ))}
+            </View>
           </View>
         )}
-      </View>
 
-      <View style={styles.header}>
-        <Text style={styles.name}>
-          {profile.displayName}
-          {age !== null ? <Text style={styles.age}>, {age}</Text> : null}
-        </Text>
-        {profile.location?.city && <Text style={styles.muted}>{profile.location.city}</Text>}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Photos</Text>
-        <PhotoGrid />
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>About</Text>
-        <Text style={styles.body}>{profile.bio || 'Add a short bio so people get a feel for you.'}</Text>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Identity</Text>
-        <View style={styles.metaRow}>
-          {profile.gender && <Pill label={genderLabels[profile.gender] ?? profile.gender} />}
-          {profile.intent && <Pill label={intentLabels[profile.intent] ?? profile.intent} />}
-          {profile.verified && <Pill label="Verified" tone="accent" />}
+        <View style={[styles.section, { marginTop: Spacing.lg }]}>
+          <PrimaryButton title="Edit profile" onPress={() => navigation.navigate('ProfileEdit')} />
+          <Pressable
+            onPress={logout}
+            style={({ pressed }) => [styles.signOut, pressed && { opacity: 0.7 }]}
+          >
+            <Text style={styles.signOutLabel}>Sign out</Text>
+          </Pressable>
         </View>
-      </View>
-
-      {profile.interests?.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Interests</Text>
-          <View style={styles.metaRow}>
-            {profile.interests.map((i) => (
-              <Pill key={i} label={i} />
-            ))}
-          </View>
-        </View>
-      )}
-
-      <Pressable
-        onPress={() => navigation.navigate('ProfileEdit')}
-        style={({ pressed }) => [styles.editBtn, pressed && styles.pressed]}
-      >
-        <Text style={styles.editBtnLabel}>Edit profile</Text>
-      </Pressable>
-
-      <Pressable
-        onPress={() => navigation.navigate('Settings')}
-        style={({ pressed }) => [styles.logoutBtn, pressed && styles.pressed]}
-      >
-        <Text style={styles.logoutLabel}>Settings</Text>
-      </Pressable>
-
-      <Pressable
-        onPress={logout}
-        style={({ pressed }) => [styles.logoutBtn, pressed && styles.pressed]}
-      >
-        <Text style={styles.logoutLabel}>Sign out</Text>
-      </Pressable>
-    </ScrollView>
+      </ScrollView>
+    </ScreenBackdrop>
   );
 };
 
-const Pill: React.FC<{ label: string; tone?: 'default' | 'accent' }> = ({ label, tone = 'default' }) => (
-  <View style={[styles.pill, tone === 'accent' && styles.pillAccent]}>
-    <Text style={[styles.pillLabel, tone === 'accent' && styles.pillLabelAccent]}>{label}</Text>
+type PillTone = 'default' | 'brand' | 'live';
+const pillBg: Record<PillTone, string> = {
+  default: AppColors.surface,
+  brand: AppColors.primaryGlow,
+  live: AppColors.liveGlow,
+};
+const pillFg: Record<PillTone, string> = {
+  default: AppColors.textPrimary,
+  brand: AppColors.primary,
+  live: AppColors.liveDim,
+};
+
+const Pill: React.FC<{ label: string; tone?: PillTone }> = ({ label, tone = 'default' }) => (
+  <View style={[styles.pill, { backgroundColor: pillBg[tone] }]}>
+    <Text style={[styles.pillLabel, { color: pillFg[tone] }]}>{label}</Text>
   </View>
 );
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.background },
-  content: { paddingBottom: Spacing['2xl'] },
-  center: { alignItems: 'center', justifyContent: 'center' },
+  content: { paddingBottom: Spacing['3xl'] },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   muted: { ...Typography.body, color: AppColors.textSecondary },
   cover: { padding: Spacing.xl, paddingBottom: 0 },
-  coverImage: {
-    width: '100%',
-    aspectRatio: 1,
+  coverFrame: {
     borderRadius: BorderRadius.xl,
-    backgroundColor: AppColors.surface2,
+    overflow: 'hidden',
+    aspectRatio: 0.95,
   },
-  coverPlaceholder: { alignItems: 'center', justifyContent: 'center' },
-  coverPlaceholderText: { ...Typography.label, color: AppColors.textMuted },
-  header: { padding: Spacing.xl, paddingBottom: Spacing.md },
-  name: { ...Typography.display, color: AppColors.textPrimary },
-  age: { ...Typography.display, color: AppColors.textSecondary },
-  section: { paddingHorizontal: Spacing.xl, marginBottom: Spacing.lg },
-  sectionLabel: {
-    ...Typography.label,
-    color: AppColors.textSecondary,
-    textTransform: 'uppercase',
-    marginBottom: Spacing.sm,
+  coverImage: { width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' },
+  coverInitial: { fontSize: 120, color: 'rgba(255,255,255,0.6)', fontWeight: '800' },
+  coverOverlay: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '55%' },
+  coverHeader: { position: 'absolute', left: Spacing.lg, right: Spacing.lg, bottom: Spacing.lg },
+  coverNameRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  coverName: { ...Typography.display, color: AppColors.white, fontSize: 32 },
+  coverAge: { ...Typography.display, color: 'rgba(255,255,255,0.85)', fontSize: 32 },
+  verifiedBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: AppColors.live,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.glowLive,
+  },
+  verifiedGlyph: { color: AppColors.white, fontSize: 14, fontWeight: '700' },
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
+  locationGlyph: { color: 'rgba(255,255,255,0.85)' },
+  locationText: { ...Typography.body, color: 'rgba(255,255,255,0.92)' },
+  gearBtn: {
+    position: 'absolute',
+    top: Spacing.md,
+    right: Spacing.md,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  gearGlyph: { color: AppColors.white, fontSize: 18 },
+  section: { paddingHorizontal: Spacing.xl, marginTop: Spacing.xl },
+  card: {
+    backgroundColor: AppColors.surface,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
   },
   body: { ...Typography.body, color: AppColors.textPrimary },
   metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
   pill: {
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs + 2,
+    paddingVertical: 8,
     borderRadius: BorderRadius.full,
-    backgroundColor: AppColors.surface2,
+    borderWidth: 1,
+    borderColor: AppColors.surface3,
   },
-  pillAccent: { backgroundColor: AppColors.primary },
-  pillLabel: { ...Typography.label, color: AppColors.textPrimary },
-  pillLabelAccent: { color: AppColors.white },
-  editBtn: {
-    marginTop: Spacing.lg,
-    marginHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: AppColors.primary,
-    alignItems: 'center',
-  },
-  editBtnLabel: { ...Typography.bodyMedium, color: AppColors.white },
-  logoutBtn: {
-    marginTop: Spacing.md,
-    marginHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    alignItems: 'center',
-  },
-  logoutLabel: { ...Typography.label, color: AppColors.textSecondary },
-  pressed: { opacity: 0.85 },
+  pillLabel: { ...Typography.label, fontWeight: '600' },
+  signOut: { alignItems: 'center', paddingVertical: Spacing.md, marginTop: Spacing.md },
+  signOutLabel: { ...Typography.label, color: AppColors.textSecondary },
 });

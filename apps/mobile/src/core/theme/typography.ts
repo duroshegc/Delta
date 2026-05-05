@@ -2,9 +2,9 @@
  * Delta Design System — typography tokens.
  * Source: delta-design-system/project/colors_and_type.css
  *
- * Each style sets a concrete fontFamily (loaded via @expo-google-fonts/*)
- * because RN/Expo can't synthesize weights from a single family the way the
- * web does.
+ * Display: Plus Jakarta Sans (headlines)
+ * Brand wordmark: Syne (logo only — high-contrast geometric)
+ * Body: DM Sans
  */
 import { TextStyle } from 'react-native';
 
@@ -15,6 +15,9 @@ export const FontFamilies = {
   body: 'DMSans_400Regular',
   bodyMedium: 'DMSans_500Medium',
   bodySemi: 'DMSans_600SemiBold',
+  // Brand wordmark
+  brand: 'Syne_800ExtraBold',
+  brandBold: 'Syne_700Bold',
 } as const;
 
 export const FontSizes = {
@@ -64,7 +67,7 @@ export const Typography = {
   label: make(FontFamilies.bodyMedium, FontSizes.label, LineHeights.normal, 0.065),
   caption: make(FontFamilies.body, FontSizes.caption, 1.4, 0.11),
 
-  // Aliases retained so older screens keep compiling.
+  // Aliases retained
   displayLarge: make(FontFamilies.displayBold, FontSizes.display, LineHeights.tight, -0.64),
   headlineLarge: make(FontFamilies.display, FontSizes.h1, LineHeights.snug, -0.24),
   headlineMedium: make(FontFamilies.displaySemi, FontSizes.h2, LineHeights.normal, -0.1),

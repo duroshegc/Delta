@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { AppColors, BorderRadius, Spacing, Typography } from '../../../core/theme';
+import { AppColors, BorderRadius, Shadows, Spacing, Typography } from '../../../core/theme';
 import { useDiscoveryStore } from '../store';
 import { SwipeCard } from '../components/SwipeCard';
 import { SwipeDirection } from '../types';
+import { ScreenBackdrop } from '../../../shared/components/ScreenBackdrop';
+import { DeltaLogo } from '../../../shared/components/DeltaLogo';
 
 export const DiscoveryScreen: React.FC = () => {
   const cards = useDiscoveryStore((s) => s.cards);
@@ -38,7 +40,15 @@ export const DiscoveryScreen: React.FC = () => {
   const visibleCards = cards.slice(0, 2).reverse();
 
   return (
-    <View style={styles.container}>
+    <ScreenBackdrop tone="mixed">
+      <View style={styles.header}>
+        <DeltaLogo size={28} />
+        <View style={styles.headerIcons}>
+          <HeaderIcon glyph="✦" />
+          <HeaderIcon glyph="≡" />
+        </View>
+      </View>
+
       <View style={styles.cardArea}>
         {loading && cards.length === 0 ? (
           <ActivityIndicator color={AppColors.primary} />
@@ -74,31 +84,82 @@ export const DiscoveryScreen: React.FC = () => {
 
       {cards.length > 0 && (
         <View style={styles.actions}>
-          <ActionButton tone="pass" label="✕" onPress={() => trigger('pass')} />
-          <ActionButton tone="super" label="★" onPress={() => trigger('super')} />
-          <ActionButton tone="like" label="♥" onPress={() => trigger('like')} />
+          <ActionButton tone="pass" glyph="✕" onPress={() => trigger('pass')} />
+          <ActionButton tone="super" glyph="★" big onPress={() => trigger('super')} />
+          <ActionButton tone="like" glyph="♥" onPress={() => trigger('like')} />
         </View>
       )}
-    </View>
+    </ScreenBackdrop>
   );
 };
 
-const ActionButton: React.FC<{ tone: 'pass' | 'super' | 'like'; label: string; onPress: () => void }> = ({
-  tone,
-  label,
-  onPress,
-}) => (
-  <Pressable
-    onPress={onPress}
-    style={({ pressed }) => [styles.actionBtn, styles[`tone_${tone}`], pressed && styles.pressed]}
-  >
-    <Text style={[styles.actionLabel, styles[`label_${tone}`]]}>{label}</Text>
-  </Pressable>
+const HeaderIcon: React.FC<{ glyph: string }> = ({ glyph }) => (
+  <View style={styles.iconBtn}>
+    <Text style={styles.iconBtnGlyph}>{glyph}</Text>
+  </View>
 );
 
+type Tone = 'pass' | 'super' | 'like';
+
+const ActionButton: React.FC<{ tone: Tone; glyph: string; big?: boolean; onPress: () => void }> = ({
+  tone,
+  glyph,
+  big,
+  onPress,
+}) => {
+  const size = big ? 72 : 60;
+  const colors: Record<Tone, { ring: string; glyph: string; shadow: any }> = {
+    pass: { ring: AppColors.danger, glyph: AppColors.danger, shadow: Shadows.soft },
+    super: { ring: AppColors.live, glyph: AppColors.live, shadow: Shadows.glowLive },
+    like: { ring: AppColors.primary, glyph: AppColors.primary, shadow: Shadows.glowPink },
+  };
+  const { ring, glyph: gColor, shadow } = colors[tone];
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: AppColors.surface,
+          borderWidth: 2,
+          borderColor: ring,
+        },
+        shadow,
+        pressed && { opacity: 0.85, transform: [{ scale: 0.94 }] },
+      ]}
+    >
+      <Text style={{ fontSize: big ? 32 : 26, color: gColor, fontWeight: '600' }}>{glyph}</Text>
+    </Pressable>
+  );
+};
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.background, padding: Spacing.xl },
-  cardArea: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.md,
+  },
+  headerIcons: { flexDirection: 'row', gap: Spacing.sm },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: AppColors.surface,
+    borderWidth: 1,
+    borderColor: AppColors.surface3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.soft,
+  },
+  iconBtnGlyph: { fontSize: 16, color: AppColors.textPrimary },
+  cardArea: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.xl },
   empty: { alignItems: 'center', padding: Spacing.xl },
   emptyTitle: { ...Typography.h2, color: AppColors.textPrimary, marginBottom: Spacing.sm },
   emptyBody: { ...Typography.body, color: AppColors.textSecondary, textAlign: 'center' },
@@ -108,33 +169,16 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     backgroundColor: AppColors.primary,
     borderRadius: BorderRadius.full,
+    ...Shadows.glowPink,
   },
-  retryLabel: { ...Typography.bodyMedium, color: AppColors.white },
+  retryLabel: { ...Typography.bodyMedium, color: AppColors.white, fontWeight: '700' },
   actions: {
     flexDirection: 'row',
     gap: Spacing.lg,
     justifyContent: 'center',
-    paddingTop: Spacing.lg,
-  },
-  actionBtn: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: AppColors.surface,
-    shadowColor: AppColors.textPrimary,
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 2,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.xl,
   },
-  actionLabel: { fontSize: 28 },
-  tone_pass: { borderWidth: 1, borderColor: AppColors.danger },
-  tone_super: { borderWidth: 1, borderColor: AppColors.live },
-  tone_like: { borderWidth: 1, borderColor: AppColors.success },
-  label_pass: { color: AppColors.danger },
-  label_super: { color: AppColors.live },
-  label_like: { color: AppColors.success },
   pressed: { opacity: 0.85 },
 });

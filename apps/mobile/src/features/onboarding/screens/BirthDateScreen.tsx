@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppColors, Spacing, Typography } from '../../../core/theme';
-import { PrimaryButton } from '../../../shared/components/PrimaryButton';
+import { AppColors, BorderRadius, Shadows, Spacing, Typography } from '../../../core/theme';
 import { TextField } from '../../../shared/components/TextField';
+import { OnboardingShell } from '../../../shared/components/OnboardingShell';
 import { OnboardingStackParamList } from '../../../navigation/types';
 import { useProfileStore } from '../../profile/store';
 
@@ -61,28 +61,48 @@ export const BirthDateScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={styles.body}>
-        <Text style={styles.title}>When's your birthday?</Text>
-        <Text style={styles.subtitle}>You must be 18 or older to use Delta.</Text>
-        <TextField
-          value={value}
-          onChangeText={(text) => setValue(formatBirthDateInput(text))}
-          placeholder="YYYY-MM-DD"
-          keyboardType="number-pad"
-          autoFocus
-          maxLength={10}
-          error={error || undefined}
-        />
-      </View>
-      <PrimaryButton title="Continue" onPress={onNext} disabled={age === null || age < 18 || age > 100} />
-    </KeyboardAvoidingView>
+    <OnboardingShell
+      step={2}
+      total={3}
+      eyebrow="Your birthday"
+      title="When were you born?"
+      subtitle="You must be 18 or older to use Delta."
+      ctaTitle="Continue"
+      onCta={onNext}
+      ctaDisabled={age === null || age < 18 || age > 100}
+    >
+      <TextField
+        value={value}
+        onChangeText={(text) => setValue(formatBirthDateInput(text))}
+        placeholder="YYYY-MM-DD"
+        keyboardType="number-pad"
+        autoFocus
+        maxLength={10}
+        error={error || undefined}
+        iconLeft="❉"
+      />
+      {age !== null && age >= 18 && age <= 100 && (
+        <View style={[styles.ageCard, Shadows.soft]}>
+          <Text style={styles.ageLabel}>Age</Text>
+          <Text style={styles.ageValue}>{age}</Text>
+        </View>
+      )}
+    </OnboardingShell>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.background, padding: Spacing.xl, justifyContent: 'space-between' },
-  body: { flex: 1, justifyContent: 'center' },
-  title: { ...Typography.h1, color: AppColors.textPrimary, marginBottom: Spacing.sm },
-  subtitle: { ...Typography.body, color: AppColors.textSecondary, marginBottom: Spacing.xl },
+  ageCard: {
+    marginTop: Spacing.md,
+    backgroundColor: AppColors.primaryGlow,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: 'rgba(236, 72, 153, 0.25)',
+  },
+  ageLabel: { ...Typography.label, color: AppColors.primary, textTransform: 'uppercase', letterSpacing: 1.4 },
+  ageValue: { ...Typography.display, color: AppColors.primary, fontSize: 36, lineHeight: 40 },
 });

@@ -9,7 +9,15 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { AppColors, BorderRadius, Spacing, Typography } from '../../../core/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import {
+  AppColors,
+  BorderRadius,
+  Shadows,
+  Spacing,
+  Typography,
+  pickProfileGradient,
+} from '../../../core/theme';
 import { DiscoveryCard, SwipeDirection } from '../types';
 
 const { width: SCREEN_W } = Dimensions.get('window');
@@ -20,7 +28,6 @@ interface Props {
   card: DiscoveryCard;
   isTop: boolean;
   onSwipe: (direction: SwipeDirection) => void;
-  /** Imperative swipe trigger from action buttons. */
   externalAction?: SwipeDirection | null;
   onExternalActionConsumed?: () => void;
 }
@@ -34,22 +41,20 @@ export const SwipeCard: React.FC<Props> = ({
 }) => {
   const x = useSharedValue(0);
   const y = useSharedValue(0);
-  const scale = useSharedValue(isTop ? 1 : 0.96);
+  const scale = useSharedValue(isTop ? 1 : 0.95);
 
   useEffect(() => {
-    scale.value = withTiming(isTop ? 1 : 0.96, { duration: 200 });
+    scale.value = withTiming(isTop ? 1 : 0.95, { duration: 220 });
   }, [isTop, scale]);
 
-  const completeSwipe = (direction: SwipeDirection) => {
-    onSwipe(direction);
-  };
+  const completeSwipe = (direction: SwipeDirection) => onSwipe(direction);
 
   const flyOff = (direction: SwipeDirection) => {
     'worklet';
     const dx = direction === 'pass' ? -EXIT_X : EXIT_X;
     const dy = direction === 'super' ? -EXIT_X : 0;
-    x.value = withTiming(dx, { duration: 220 });
-    y.value = withTiming(dy, { duration: 220 }, () => {
+    x.value = withTiming(dx, { duration: 240 });
+    y.value = withTiming(dy, { duration: 240 }, () => {
       runOnJS(completeSwipe)(direction);
     });
   };
@@ -81,7 +86,7 @@ export const SwipeCard: React.FC<Props> = ({
     });
 
   const cardStyle = useAnimatedStyle(() => {
-    const rotate = interpolate(x.value, [-SCREEN_W, 0, SCREEN_W], [-12, 0, 12]);
+    const rotate = interpolate(x.value, [-SCREEN_W, 0, SCREEN_W], [-10, 0, 10]);
     return {
       transform: [
         { translateX: x.value },
@@ -94,31 +99,65 @@ export const SwipeCard: React.FC<Props> = ({
 
   const likeBadgeStyle = useAnimatedStyle(() => ({
     opacity: interpolate(x.value, [0, SWIPE_THRESHOLD], [0, 1], 'clamp'),
+    transform: [{ rotate: '-12deg' }, { scale: interpolate(x.value, [0, SWIPE_THRESHOLD], [0.85, 1], 'clamp') }],
   }));
   const passBadgeStyle = useAnimatedStyle(() => ({
     opacity: interpolate(x.value, [-SWIPE_THRESHOLD, 0], [1, 0], 'clamp'),
+    transform: [{ rotate: '12deg' }, { scale: interpolate(x.value, [-SWIPE_THRESHOLD, 0], [1, 0.85], 'clamp') }],
   }));
   const superBadgeStyle = useAnimatedStyle(() => ({
     opacity: interpolate(y.value, [-SWIPE_THRESHOLD * 1.5, 0], [1, 0], 'clamp'),
+    transform: [{ scale: interpolate(y.value, [-SWIPE_THRESHOLD * 1.5, 0], [1, 0.85], 'clamp') }],
   }));
 
   const cover = card.photos[0]?.url;
+  const grad = pickProfileGradient(card.displayName ?? 'Delta');
 
   return (
     <GestureDetector gesture={pan}>
-      <Animated.View style={[styles.card, cardStyle]} pointerEvents={isTop ? 'auto' : 'none'}>
+      <Animated.View
+        style={[styles.card, Shadows.large, cardStyle]}
+        pointerEvents={isTop ? 'auto' : 'none'}
+      >
         {cover ? (
           <Image source={{ uri: cover }} style={styles.image} />
         ) : (
-          <View style={[styles.image, styles.imagePlaceholder]} />
+          <LinearGradient
+            colors={grad as unknown as string[]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.image}
+          >
+            <Text style={styles.placeholderInitial}>
+              {(card.displayName ?? '?').charAt(0).toUpperCase()}
+            </Text>
+          </LinearGradient>
         )}
-        <View style={styles.overlay} />
+
+        <LinearGradient
+          colors={['transparent', 'rgba(28,15,20,0.05)', 'rgba(28,15,20,0.92)']}
+          locations={[0, 0.45, 1]}
+          style={styles.overlay}
+        />
+
+        {card.verified && (
+          <View style={styles.onlinePill}>
+            <View style={styles.onlineDot} />
+            <Text style={styles.onlineText}>Verified</Text>
+          </View>
+        )}
+
         <View style={styles.info}>
           <Text style={styles.name}>
             {card.displayName}
             <Text style={styles.age}>, {card.age}</Text>
           </Text>
-          {card.city && <Text style={styles.city}>{card.city}</Text>}
+          {card.city && (
+            <View style={styles.cityRow}>
+              <Text style={styles.cityGlyph}>◉</Text>
+              <Text style={styles.city}>{card.city}</Text>
+            </View>
+          )}
           {card.bio ? (
             <Text style={styles.bio} numberOfLines={2}>
               {card.bio}
@@ -127,13 +166,13 @@ export const SwipeCard: React.FC<Props> = ({
         </View>
 
         <Animated.View style={[styles.badge, styles.likeBadge, likeBadgeStyle]}>
-          <Text style={styles.badgeText}>LIKE</Text>
+          <Text style={[styles.badgeText, { color: AppColors.primary }]}>LIKE</Text>
         </Animated.View>
         <Animated.View style={[styles.badge, styles.passBadge, passBadgeStyle]}>
-          <Text style={styles.badgeText}>NOPE</Text>
+          <Text style={[styles.badgeText, { color: AppColors.danger }]}>NOPE</Text>
         </Animated.View>
         <Animated.View style={[styles.badge, styles.superBadge, superBadgeStyle]}>
-          <Text style={styles.badgeText}>SUPER</Text>
+          <Text style={[styles.badgeText, { color: AppColors.live }]}>SUPER</Text>
         </Animated.View>
       </Animated.View>
     </GestureDetector>
@@ -146,45 +185,58 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.surface,
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
-    shadowColor: AppColors.textPrimary,
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 12 },
   },
-  image: { ...StyleSheet.absoluteFillObject },
-  imagePlaceholder: { backgroundColor: AppColors.surface2 },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'transparent',
+  image: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+  placeholderInitial: { fontSize: 160, color: 'rgba(255,255,255,0.45)', fontWeight: '800' },
+  overlay: { ...StyleSheet.absoluteFillObject },
+  onlinePill: {
+    position: 'absolute',
+    top: Spacing.lg,
+    left: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.full,
   },
+  onlineDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: AppColors.live,
+  },
+  onlineText: { ...Typography.caption, color: AppColors.textPrimary, fontWeight: '700' },
   info: {
     position: 'absolute',
-    left: Spacing.xl,
-    right: Spacing.xl,
-    bottom: Spacing.xl,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    padding: Spacing.base,
-    borderRadius: BorderRadius.lg,
+    left: Spacing.lg,
+    right: Spacing.lg,
+    bottom: Spacing.lg,
   },
-  name: { ...Typography.h1, color: AppColors.white },
-  age: { ...Typography.h1, color: AppColors.white, opacity: 0.85 },
-  city: { ...Typography.label, color: AppColors.white, opacity: 0.85, marginTop: 2 },
-  bio: { ...Typography.body, color: AppColors.white, marginTop: Spacing.sm },
+  name: { ...Typography.display, color: AppColors.white, fontSize: 30, lineHeight: 34 },
+  age: { ...Typography.display, color: 'rgba(255,255,255,0.85)', fontSize: 30, lineHeight: 34 },
+  cityRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
+  cityGlyph: { color: 'rgba(255,255,255,0.85)', fontSize: 13 },
+  city: { ...Typography.body, color: 'rgba(255,255,255,0.92)' },
+  bio: { ...Typography.body, color: 'rgba(255,255,255,0.92)', marginTop: Spacing.sm },
   badge: {
     position: 'absolute',
-    top: Spacing.xl,
+    top: Spacing.xl + 12,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingVertical: 6,
     borderRadius: BorderRadius.md,
     borderWidth: 3,
+    backgroundColor: 'rgba(255,255,255,0.95)',
   },
-  likeBadge: { right: Spacing.xl, borderColor: AppColors.success, transform: [{ rotate: '15deg' }] },
-  passBadge: { left: Spacing.xl, borderColor: AppColors.danger, transform: [{ rotate: '-15deg' }] },
+  likeBadge: { right: Spacing.xl, borderColor: AppColors.primary },
+  passBadge: { left: Spacing.xl, borderColor: AppColors.danger },
   superBadge: {
     alignSelf: 'center',
     left: '50%',
-    marginLeft: -50,
+    marginLeft: -56,
+    top: 100,
     borderColor: AppColors.live,
   },
-  badgeText: { ...Typography.h2, color: AppColors.white, letterSpacing: 2 },
+  badgeText: { ...Typography.h1, letterSpacing: 2.5, fontWeight: '800', fontSize: 22 },
 });

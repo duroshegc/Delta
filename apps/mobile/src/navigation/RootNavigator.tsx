@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer, DefaultTheme, Theme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { AppColors, Typography } from '../core/theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { AppColors, Shadows, Typography } from '../core/theme';
 import { useAuthStore } from '../features/auth/store';
 import { WelcomeScreen } from '../features/auth/screens/WelcomeScreen';
 import { SignInScreen } from '../features/auth/screens/SignInScreen';
@@ -154,24 +155,102 @@ const LiveNavigator = () => (
   </LiveStack.Navigator>
 );
 
+const TabIcon: React.FC<{ glyph: string; focused: boolean }> = ({ glyph, focused }) => (
+  <Text
+    style={{
+      fontSize: 22,
+      color: focused ? AppColors.primary : AppColors.textMuted,
+      marginTop: 4,
+    }}
+  >
+    {glyph}
+  </Text>
+);
+
+const LiveFAB: React.FC<{ focused: boolean }> = () => (
+  <View
+    style={{
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      marginBottom: 24,
+      ...Shadows.glowPink,
+    }}
+  >
+    <LinearGradient
+      colors={[AppColors.live, AppColors.primary]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{
+        flex: 1,
+        borderRadius: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 3,
+        borderColor: AppColors.background,
+      }}
+    >
+      <Text style={{ color: AppColors.white, fontSize: 24, fontWeight: '800' }}>●</Text>
+    </LinearGradient>
+  </View>
+);
+
 const AppNavigator = () => (
   <AppTabs.Navigator
     screenOptions={{
       headerShown: false,
       tabBarStyle: {
         backgroundColor: AppColors.surface,
-        borderTopColor: AppColors.surface3,
+        borderTopWidth: 0,
+        height: 84,
+        paddingTop: 8,
+        ...Shadows.medium,
       },
       tabBarActiveTintColor: AppColors.primary,
       tabBarInactiveTintColor: AppColors.textMuted,
-      tabBarLabelStyle: { ...Typography.caption },
+      tabBarLabelStyle: { ...Typography.caption, fontWeight: '600' },
     }}
   >
-    <AppTabs.Screen name="Discovery" component={DiscoveryScreen} />
-    <AppTabs.Screen name="Matches" component={MatchesNavigator} />
-    <AppTabs.Screen name="Live" component={LiveNavigator} options={{ title: 'Live' }} />
-    <AppTabs.Screen name="Wallet" component={WalletNavigator} />
-    <AppTabs.Screen name="ProfileTab" component={ProfileNavigator} options={{ title: 'Profile' }} />
+    <AppTabs.Screen
+      name="Discovery"
+      component={DiscoveryScreen}
+      options={{
+        title: 'Discover',
+        tabBarIcon: ({ focused }) => <TabIcon glyph="◇" focused={focused} />,
+      }}
+    />
+    <AppTabs.Screen
+      name="Matches"
+      component={MatchesNavigator}
+      options={{
+        title: 'Matches',
+        tabBarIcon: ({ focused }) => <TabIcon glyph="♥" focused={focused} />,
+      }}
+    />
+    <AppTabs.Screen
+      name="Live"
+      component={LiveNavigator}
+      options={{
+        title: '',
+        tabBarIcon: ({ focused }) => <LiveFAB focused={focused} />,
+      }}
+    />
+    <AppTabs.Screen
+      name="Wallet"
+      component={WalletNavigator}
+      options={{
+        title: 'Wallet',
+        tabBarIcon: ({ focused }) => <TabIcon glyph="◈" focused={focused} />,
+      }}
+    />
+    <AppTabs.Screen
+      name="ProfileTab"
+      component={ProfileNavigator}
+      options={{
+        title: 'Profile',
+        tabBarIcon: ({ focused }) => <TabIcon glyph="◉" focused={focused} />,
+      }}
+    />
   </AppTabs.Navigator>
 );
 

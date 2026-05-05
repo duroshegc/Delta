@@ -16,6 +16,10 @@ import {
   DMSans_500Medium,
   DMSans_600SemiBold,
 } from '@expo-google-fonts/dm-sans';
+import {
+  Syne_700Bold,
+  Syne_800ExtraBold,
+} from '@expo-google-fonts/syne';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { registerLiveKitGlobals } from './src/core/livekit/register';
 
@@ -34,6 +38,8 @@ export default function App() {
     DMSans_400Regular,
     DMSans_500Medium,
     DMSans_600SemiBold,
+    Syne_700Bold,
+    Syne_800ExtraBold,
   });
 
   useEffect(() => {

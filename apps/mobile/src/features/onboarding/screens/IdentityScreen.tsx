@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppColors, Spacing, Typography } from '../../../core/theme';
-import { PrimaryButton } from '../../../shared/components/PrimaryButton';
+import { OnboardingShell } from '../../../shared/components/OnboardingShell';
 import { SelectChip } from '../../../shared/components/SelectChip';
 import { OnboardingStackParamList } from '../../../navigation/types';
 import { getApiErrorMessage } from '../../../core/api/errors';
@@ -11,18 +11,18 @@ import { DatingIntent, Gender } from '../../profile/types';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'OnboardingIdentity'>;
 
-const GENDERS: Array<{ value: Gender; label: string }> = [
-  { value: 'female', label: 'Woman' },
-  { value: 'male', label: 'Man' },
-  { value: 'nonbinary', label: 'Non-binary' },
-  { value: 'other', label: 'Other' },
+const GENDERS: Array<{ value: Gender; label: string; glyph: string }> = [
+  { value: 'female', label: 'Woman', glyph: '♀' },
+  { value: 'male', label: 'Man', glyph: '♂' },
+  { value: 'nonbinary', label: 'Non-binary', glyph: '◇' },
+  { value: 'other', label: 'Other', glyph: '✦' },
 ];
 
-const INTENTS: Array<{ value: DatingIntent; label: string }> = [
-  { value: 'serious', label: 'Long-term' },
-  { value: 'casual', label: 'Short-term' },
-  { value: 'friendship', label: 'Friends' },
-  { value: 'networking', label: 'Networking' },
+const INTENTS: Array<{ value: DatingIntent; label: string; glyph: string }> = [
+  { value: 'serious', label: 'Long-term', glyph: '♥' },
+  { value: 'casual', label: 'Short-term', glyph: '◐' },
+  { value: 'friendship', label: 'Friends', glyph: '☻' },
+  { value: 'networking', label: 'Networking', glyph: '◈' },
 ];
 
 export const IdentityScreen: React.FC<Props> = () => {
@@ -56,16 +56,27 @@ export const IdentityScreen: React.FC<Props> = () => {
   const canSubmit = !!gender && interestedIn.length > 0 && !!intent;
 
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>Tell us about you</Text>
-
+    <OnboardingShell
+      step={3}
+      total={3}
+      eyebrow="About you"
+      title="Tell us who you are."
+      subtitle="We use this to find better matches."
+      ctaTitle="Finish setup"
+      ctaIcon="✓"
+      onCta={onFinish}
+      ctaLoading={saving}
+      ctaDisabled={!canSubmit}
+      scrollable
+    >
+      <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.section}>I am a</Text>
         <View style={styles.row}>
           {GENDERS.map((g) => (
             <SelectChip
               key={g.value}
               label={g.label}
+              glyph={g.glyph}
               selected={gender === g.value}
               onPress={() => setGender(g.value)}
             />
@@ -78,6 +89,7 @@ export const IdentityScreen: React.FC<Props> = () => {
             <SelectChip
               key={g.value}
               label={g.label}
+              glyph={g.glyph}
               selected={interestedIn.includes(g.value)}
               onPress={() => toggleInterest(g.value)}
             />
@@ -90,27 +102,25 @@ export const IdentityScreen: React.FC<Props> = () => {
             <SelectChip
               key={i.value}
               label={i.label}
+              glyph={i.glyph}
               selected={intent === i.value}
               onPress={() => setIntent(i.value)}
             />
           ))}
         </View>
       </ScrollView>
-      <PrimaryButton title="Finish" onPress={onFinish} loading={saving} disabled={!canSubmit} />
-    </View>
+    </OnboardingShell>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.background, padding: Spacing.xl },
-  scroll: { paddingBottom: Spacing.xl },
-  title: { ...Typography.h1, color: AppColors.textPrimary, marginBottom: Spacing.xl },
   section: {
     ...Typography.label,
     color: AppColors.textSecondary,
     marginTop: Spacing.lg,
     marginBottom: Spacing.md,
     textTransform: 'uppercase',
+    letterSpacing: 1.2,
   },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
 });

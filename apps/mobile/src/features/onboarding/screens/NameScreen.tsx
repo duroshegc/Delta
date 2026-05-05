@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppColors, Spacing, Typography } from '../../../core/theme';
-import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { TextField } from '../../../shared/components/TextField';
+import { OnboardingShell } from '../../../shared/components/OnboardingShell';
 import { OnboardingStackParamList } from '../../../navigation/types';
 import { useProfileStore } from '../../profile/store';
 
@@ -20,20 +18,24 @@ export const NameScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={styles.body}>
-        <Text style={styles.title}>What should we call you?</Text>
-        <Text style={styles.subtitle}>This is how you'll appear on Delta.</Text>
-        <TextField value={name} onChangeText={setName} placeholder="Your name" autoFocus autoCapitalize="words" />
-      </View>
-      <PrimaryButton title="Continue" onPress={onNext} disabled={name.trim().length < 2} />
-    </KeyboardAvoidingView>
+    <OnboardingShell
+      step={1}
+      total={3}
+      eyebrow="Your name"
+      title="What should we call you?"
+      subtitle="This is how you'll appear on Delta."
+      ctaTitle="Continue"
+      onCta={onNext}
+      ctaDisabled={name.trim().length < 2}
+    >
+      <TextField
+        value={name}
+        onChangeText={setName}
+        placeholder="Your name"
+        autoFocus
+        autoCapitalize="words"
+        iconLeft="◉"
+      />
+    </OnboardingShell>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: AppColors.background, padding: Spacing.xl, justifyContent: 'space-between' },
-  body: { flex: 1, justifyContent: 'center' },
-  title: { ...Typography.h1, color: AppColors.textPrimary, marginBottom: Spacing.sm },
-  subtitle: { ...Typography.body, color: AppColors.textSecondary, marginBottom: Spacing.xl },
-});
