@@ -102,10 +102,10 @@ const app = new Elysia()
         const db = getDatabase();
         await db.command({ ping: 1 });
         health.services.database = "ok";
-      } catch (error) {
+      } catch (err) {
         health.services.database = "error";
         health.status = "degraded";
-        logger.error({ error }, "MongoDB health check failed");
+        logger.error({ err }, "MongoDB health check failed");
       }
 
       // Check Redis
@@ -113,10 +113,10 @@ const app = new Elysia()
         const redis = getRedis();
         await redis.ping();
         health.services.redis = "ok";
-      } catch (error) {
+      } catch (err) {
         health.services.redis = "error";
         health.status = "degraded";
-        logger.error({ error }, "Redis health check failed");
+        logger.error({ err }, "Redis health check failed");
       }
 
       return health;
