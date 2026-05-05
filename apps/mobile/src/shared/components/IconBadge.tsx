@@ -44,7 +44,7 @@ export const IconBadge: React.FC<Props> = ({ glyph, tone = 'brand', size = 'md',
       ]}
     >
       <LinearGradient
-        colors={colors as unknown as string[]}
+        colors={colors}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.surface, { borderRadius: BorderRadius.md }]}

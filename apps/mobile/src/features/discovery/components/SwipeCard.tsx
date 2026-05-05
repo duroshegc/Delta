@@ -123,7 +123,7 @@ export const SwipeCard: React.FC<Props> = ({
           <Image source={{ uri: cover }} style={styles.image} />
         ) : (
           <LinearGradient
-            colors={grad as unknown as string[]}
+            colors={grad}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.image}
@@ -135,7 +135,7 @@ export const SwipeCard: React.FC<Props> = ({
         )}
 
         <LinearGradient
-          colors={['transparent', 'rgba(28,15,20,0.05)', 'rgba(28,15,20,0.92)']}
+          colors={['transparent', 'rgba(28,15,20,0.05)', 'rgba(28,15,20,0.92)'] as const}
           locations={[0, 0.45, 1]}
           style={styles.overlay}
         />

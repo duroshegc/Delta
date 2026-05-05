@@ -90,7 +90,7 @@ export const PrimaryButton: React.FC<Props> = ({
         ]}
       >
         <LinearGradient
-          colors={colors as unknown as string[]}
+          colors={colors}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0.8 }}
           style={[styles.fill, { borderRadius: BorderRadius.full }]}

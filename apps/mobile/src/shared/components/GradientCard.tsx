@@ -42,7 +42,7 @@ export const GradientCard: React.FC<Props> = ({
   return (
     <View style={[{ borderRadius: radius }, halo, style]}>
       <LinearGradient
-        colors={colors as unknown as string[]}
+        colors={colors}
         start={start}
         end={end}
         style={[styles.surface, { borderRadius: radius }]}

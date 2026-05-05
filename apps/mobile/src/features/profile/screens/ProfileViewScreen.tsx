@@ -57,7 +57,7 @@ export const ProfileViewScreen: React.FC<Props> = ({ navigation }) => {
               <Image source={{ uri: cover.url }} style={styles.coverImage} />
             ) : (
               <LinearGradient
-                colors={grad as unknown as string[]}
+                colors={grad}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.coverImage}
@@ -66,7 +66,7 @@ export const ProfileViewScreen: React.FC<Props> = ({ navigation }) => {
               </LinearGradient>
             )}
             <LinearGradient
-              colors={['transparent', 'rgba(28,15,20,0.78)']}
+              colors={['transparent', 'rgba(28,15,20,0.78)'] as const}
               style={styles.coverOverlay}
             />
             <View style={styles.coverHeader}>

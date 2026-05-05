@@ -23,7 +23,7 @@ export const SelectChip: React.FC<Props> = ({ label, selected, onPress, glyph, s
   >
     {selected ? (
       <LinearGradient
-        colors={Gradients.brand as unknown as string[]}
+        colors={Gradients.brand}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.fill}

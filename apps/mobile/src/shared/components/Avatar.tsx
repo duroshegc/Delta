@@ -27,7 +27,7 @@ export const Avatar: React.FC<Props> = ({ uri, name, size = 56, ring = false, st
     <Image source={{ uri }} style={{ width: innerSize, height: innerSize, borderRadius: innerRadius }} />
   ) : (
     <LinearGradient
-      colors={grad as unknown as string[]}
+      colors={grad}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={[
@@ -50,7 +50,7 @@ export const Avatar: React.FC<Props> = ({ uri, name, size = 56, ring = false, st
       ]}
     >
       <LinearGradient
-        colors={['#EC4899', '#F97316'] as unknown as string[]}
+        colors={['#EC4899', '#F97316'] as const}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[StyleSheet.absoluteFill, { borderRadius: radius }]}
